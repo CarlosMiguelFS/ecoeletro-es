@@ -35,6 +35,9 @@ async function carregarBase() {
   }
 
   const email = (process.env.ADMIN_EMAIL || 'admin@ecoeletro.local').toLowerCase();
+  if (process.env.NODE_ENV === 'production' && !process.env.ADMIN_SENHA) {
+    throw new Error('Defina ADMIN_SENHA: em produção o admin não pode usar a senha padrão.');
+  }
   const senha = process.env.ADMIN_SENHA || 'trocar123';
   await prisma.usuarioAdmin.upsert({
     where: { email },

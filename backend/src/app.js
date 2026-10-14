@@ -1,17 +1,17 @@
-import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import cors from 'cors';
 import express from 'express';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
-import swaggerUi from 'swagger-ui-express';
 import { env } from './config/env.js';
+import openapi from './docs/openapi.json' with { type: 'json' };
+import { paginaDocs } from './docs/pagina-docs.js';
 import { rotaNaoEncontrada, tratarErros } from './middlewares/erro.js';
 import { rotasAdmin } from './routes/admin.routes.js';
 import { rotasAuth } from './routes/auth.routes.js';
 import { rotasPublicas } from './routes/publicas.routes.js';
 
-const openapi = JSON.parse(readFileSync(new URL('./docs/openapi.json', import.meta.url), 'utf8'));
+// No Vercel o site é servido pela CDN (pasta public/); localmente e no Docker, por aqui.
 const pastaFrontend = fileURLToPath(new URL('../../frontend', import.meta.url));
 
 function origemPermitida(origem, callback) {
@@ -25,7 +25,8 @@ export function criarApp() {
   app.set('trust proxy', 1);
 
   // Documentação antes do helmet, porque o Swagger UI não funciona com a CSP abaixo.
-  app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(openapi, { customSiteTitle: 'EcoEletro ES — API' }));
+  app.get('/api/openapi.json', (req, res) => res.json(openapi));
+  app.get(['/api/docs', '/api/docs/'], (req, res) => res.type('html').send(paginaDocs));
 
   app.use(
     helmet({

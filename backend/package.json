@@ -13,7 +13,8 @@
     "db:studio": "prisma studio",
     "test": "node --env-file-if-exists=.env --env-file=.env.test --test",
     "postinstall": "prisma generate",
-    "pretest": "node scripts/preparar-testes.js"
+    "pretest": "node scripts/preparar-testes.js",
+    "vercel-build": "node scripts/vercel-build.js"
   },
   "engines": {
     "node": ">=20.12"
@@ -28,7 +29,6 @@
     "helmet": "^8.3.0",
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.4.0",
-    "swagger-ui-express": "^5.0.1",
     "zod": "^4.6.5"
   },
   "devDependencies": {

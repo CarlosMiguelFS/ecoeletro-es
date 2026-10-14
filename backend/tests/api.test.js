@@ -152,6 +152,22 @@ describe('Rotas públicas', () => {
     assert.equal(r.headers['referrer-policy'], 'strict-origin-when-cross-origin');
   });
 
+  it('serve a documentação (Swagger por CDN) e o OpenAPI', async () => {
+    const pagina = await request(app).get('/api/docs');
+    assert.equal(pagina.status, 200);
+    assert.match(pagina.text, /swagger-ui-bundle\.js/);
+
+    const spec = await request(app).get('/api/openapi.json');
+    assert.equal(spec.status, 200);
+    assert.ok(spec.body.paths['/pontos/proximos']);
+  });
+
+  it('o index.js exporta o app para o Vercel', async () => {
+    const { default: appVercel } = await import('../index.js');
+    const r = await request(appVercel).get('/api/saude');
+    assert.equal(r.status, 200);
+  });
+
   it('rota inexistente → 404 no formato padrão', async () => {
     const r = await request(app).get('/api/nao-existe');
     assert.equal(r.status, 404);

@@ -64,11 +64,11 @@ npm run db:setup             # cria o banco SQLite e importa os pontos reais
 npm run dev                  # sobe a API e o site
 ```
 
-| Endereço                             | O que é                                        |
-| ------------------------------------ | ---------------------------------------------- |
-| http://localhost:3000                | O site                                         |
-| http://localhost:3000/?cep=29101-010 | O site já com uma busca feita                  |
-| http://localhost:3000/api/docs       | Documentação da API (dá para testar as rotas)  |
+| Endereço                             | O que é                                       |
+| ------------------------------------ | --------------------------------------------- |
+| http://localhost:3000                | O site                                        |
+| http://localhost:3000/?cep=29101-010 | O site já com uma busca feita                 |
+| http://localhost:3000/api/docs       | Documentação da API (dá para testar as rotas) |
 
 Login do admin criado pelo seed: `admin@ecoeletro.local` / `trocar123` (mude `ADMIN_EMAIL` e `ADMIN_SENHA` no `.env` antes do `db:setup`).
 
@@ -82,6 +82,20 @@ Login do admin criado pelo seed: `admin@ecoeletro.local` / `trocar123` (mude `AD
 | `npm run db:studio` | Abre o Prisma Studio para ver e editar o banco no navegador                      |
 
 Para adicionar ou corrigir pontos, edite [backend/seed/pontos-reais.csv](backend/seed/pontos-reais.csv) e rode `npm run db:seed` — ou envie um CSV em `POST /api/admin/pontos/importar` pelo Swagger. Linhas sem latitude/longitude são geocodificadas automaticamente.
+
+## Deploy no Vercel
+
+O back-end vira uma função serverless e o site é servido pela CDN do Vercel. Como lá o disco não é permanente, o banco é **PostgreSQL** (Neon, plano grátis); localmente continua SQLite — o build troca sozinho.
+
+1. **Add New → Project** → importe o repositório → em **Root Directory** escolha **`backend`** (o Vercel detecta o Express).
+2. Antes de fazer o deploy, abra **Environment Variables** e adicione:
+   - `JWT_SECRET` — um texto aleatório longo
+   - `ADMIN_SENHA` — a senha do usuário admin (`admin@ecoeletro.local`)
+3. Clique em **Deploy**. O primeiro deploy vai **falhar de propósito** pedindo o banco — é normal.
+4. No projeto: **Storage → Create Database → Neon** (Free) → conecte ao projeto (marque Production e Preview). Isso cria a variável `DATABASE_URL`.
+5. **Deployments → ⋯ → Redeploy**. O build (`npm run vercel-build`) copia o site para `public/`, cria as tabelas e carrega os 32 pontos.
+
+Cada `git push` na branch `main` gera um deploy novo automaticamente.
 
 ## Deploy com Docker
 

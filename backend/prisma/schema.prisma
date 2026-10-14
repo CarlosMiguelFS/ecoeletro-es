@@ -1,7 +1,7 @@
 // Modelo de dados do EcoEletro ES (seção 4 do docs/levantamento-backend.md).
 //
 // Desenvolvimento: SQLite (arquivo local, zero instalação).
-// Produção (Supabase/Neon): troque provider para "postgresql" e DATABASE_URL para a URL do banco.
+// Produção no Vercel: scripts/vercel-build.js troca o provider para "postgresql" durante o build.
 // Campos "enum" são String porque o SQLite não tem enum; os valores válidos ficam em src/utils/constantes.js.
 
 generator client {

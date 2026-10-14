@@ -5,3 +5,6 @@ node_modules/
 
 # Documentos do estágio (modelos, ofícios): ficam só na máquina
 documentos/
+
+# Gerada no build do Vercel (cópia de frontend/)
+backend/public/
