@@ -33,6 +33,16 @@ export function dentroDoES(latitude, longitude) {
  */
 export function linkComoChegar(latitude, longitude, origem) {
   const parametros = new URLSearchParams({ api: '1', destination: `${latitude},${longitude}` });
-  if (origem) parametros.set('origin', `${origem.latitude},${origem.longitude}`);
+  if (origem) parametros.set('origin', descreverOrigem(origem));
   return `https://www.google.com/maps/dir/?${parametros}`;
+}
+
+/**
+ * Busca por CEP: manda o endereço por escrito ("Rua X, Bairro, Cidade - ES, 29945-430"), que o
+ * Google Maps mostra como ponto de partida e localiza com precisão. Busca por GPS: coordenadas.
+ */
+function descreverOrigem(origem) {
+  if (!origem.cep) return `${origem.latitude},${origem.longitude}`;
+  const local = [origem.logradouro, origem.bairro, origem.cidade && `${origem.cidade} - ES`];
+  return [...local.filter(Boolean), origem.cep].join(', ');
 }
