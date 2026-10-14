@@ -5,11 +5,22 @@
     "version": "1.0.0",
     "description": "Pontos de coleta de lixo eletrônico no Espírito Santo (Projeto PEI II). Os dados do seed são fictícios."
   },
-  "servers": [{ "url": "/api" }],
+  "servers": [
+    {
+      "url": "/api"
+    }
+  ],
   "tags": [
-    { "name": "Público" },
-    { "name": "Autenticação" },
-    { "name": "Admin", "description": "Exige token (botão Authorize)." }
+    {
+      "name": "Público"
+    },
+    {
+      "name": "Autenticação"
+    },
+    {
+      "name": "Admin",
+      "description": "Exige token (botão Authorize)."
+    }
   ],
   "paths": {
     "/pontos": {
@@ -17,23 +28,57 @@
         "tags": ["Público"],
         "summary": "Lista paginada de pontos ativos",
         "parameters": [
-          { "name": "municipio", "in": "query", "schema": { "type": "string" }, "example": "Vila Velha" },
+          {
+            "name": "municipio",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "example": "Vila Velha"
+          },
           {
             "name": "categoria",
             "in": "query",
-            "schema": { "type": "string" },
+            "schema": {
+              "type": "string"
+            },
             "example": "pilhas-baterias"
           },
-          { "$ref": "#/components/parameters/tipo" },
-          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
-          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 20, "maximum": 200 } }
+          {
+            "$ref": "#/components/parameters/tipo"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "maximum": 200
+            }
+          }
         ],
         "responses": {
           "200": {
             "description": "OK",
-            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ListaPontos" } } }
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListaPontos"
+                }
+              }
+            }
           },
-          "400": { "$ref": "#/components/responses/Erro" }
+          "400": {
+            "$ref": "#/components/responses/Erro"
+          }
         }
       }
     },
@@ -41,34 +86,85 @@
       "get": {
         "tags": ["Público"],
         "summary": "Pontos mais próximos de um CEP ou de uma coordenada",
-        "description": "Informe `cep` **ou** `lat` + `lng` (somente ES). Devolve todos os pontos dentro do raio (padrão 12 km). Se nenhum estiver no raio, devolve só o mais próximo, a qualquer distância, com `fora_do_raio: true`.",
+        "description": "Informe `cep` **ou** `lat` + `lng` (somente ES). Devolve os pontos até `raio` km **de carro, pelas ruas** (OSRM), com `distancia_km`, `duracao_min` e `distancia_reta_km`. Se o serviço de rotas falhar, usa linha reta e devolve `distancia_tipo: \"linha_reta\"`. Sem ponto no alcance, devolve só o mais próximo, a qualquer distância, com `fora_do_raio: true`.",
         "parameters": [
-          { "name": "cep", "in": "query", "schema": { "type": "string" }, "example": "29101-010" },
-          { "name": "lat", "in": "query", "schema": { "type": "number" }, "example": -20.33 },
-          { "name": "lng", "in": "query", "schema": { "type": "number" }, "example": -40.29 },
+          {
+            "name": "cep",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "example": "29101-010"
+          },
+          {
+            "name": "lat",
+            "in": "query",
+            "schema": {
+              "type": "number"
+            },
+            "example": -20.33
+          },
+          {
+            "name": "lng",
+            "in": "query",
+            "schema": {
+              "type": "number"
+            },
+            "example": -40.29
+          },
           {
             "name": "raio",
             "in": "query",
-            "schema": { "type": "number", "default": 12, "maximum": 100 },
+            "schema": {
+              "type": "number",
+              "default": 12,
+              "maximum": 100
+            },
             "description": "km"
           },
           {
             "name": "limite",
             "in": "query",
-            "schema": { "type": "integer", "default": 100, "maximum": 200 }
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "maximum": 200
+            }
           },
-          { "name": "categoria", "in": "query", "schema": { "type": "string" } },
-          { "$ref": "#/components/parameters/tipo" }
+          {
+            "name": "categoria",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/tipo"
+          }
         ],
         "responses": {
           "200": {
             "description": "OK",
-            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Proximos" } } }
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Proximos"
+                }
+              }
+            }
           },
-          "400": { "$ref": "#/components/responses/Erro" },
-          "404": { "$ref": "#/components/responses/Erro" },
-          "422": { "$ref": "#/components/responses/Erro" },
-          "503": { "$ref": "#/components/responses/Erro" }
+          "400": {
+            "$ref": "#/components/responses/Erro"
+          },
+          "404": {
+            "$ref": "#/components/responses/Erro"
+          },
+          "422": {
+            "$ref": "#/components/responses/Erro"
+          },
+          "503": {
+            "$ref": "#/components/responses/Erro"
+          }
         }
       }
     },
@@ -76,13 +172,25 @@
       "get": {
         "tags": ["Público"],
         "summary": "Detalhe de um ponto",
-        "parameters": [{ "$ref": "#/components/parameters/id" }],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/id"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
-            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Ponto" } } }
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ponto"
+                }
+              }
+            }
           },
-          "404": { "$ref": "#/components/responses/Erro" }
+          "404": {
+            "$ref": "#/components/responses/Erro"
+          }
         }
       }
     },
@@ -90,14 +198,22 @@
       "get": {
         "tags": ["Público"],
         "summary": "Materiais aceitos",
-        "responses": { "200": { "description": "OK" } }
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
       }
     },
     "/municipios": {
       "get": {
         "tags": ["Público"],
         "summary": "Municípios com pelo menos um ponto ativo",
-        "responses": { "200": { "description": "OK" } }
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
       }
     },
     "/cep/{cep}": {
@@ -109,19 +225,35 @@
             "name": "cep",
             "in": "path",
             "required": true,
-            "schema": { "type": "string" },
+            "schema": {
+              "type": "string"
+            },
             "example": "29101010"
           }
         ],
         "responses": {
           "200": {
             "description": "OK",
-            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Cep" } } }
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Cep"
+                }
+              }
+            }
           },
-          "400": { "$ref": "#/components/responses/Erro" },
-          "404": { "$ref": "#/components/responses/Erro" },
-          "422": { "$ref": "#/components/responses/Erro" },
-          "503": { "$ref": "#/components/responses/Erro" }
+          "400": {
+            "$ref": "#/components/responses/Erro"
+          },
+          "404": {
+            "$ref": "#/components/responses/Erro"
+          },
+          "422": {
+            "$ref": "#/components/responses/Erro"
+          },
+          "503": {
+            "$ref": "#/components/responses/Erro"
+          }
         }
       }
     },
@@ -138,13 +270,23 @@
                 "type": "object",
                 "required": ["tipo", "mensagem"],
                 "properties": {
-                  "tipo": { "type": "string", "enum": ["novo_ponto", "correcao", "ponto_fechado"] },
+                  "tipo": {
+                    "type": "string",
+                    "enum": ["novo_ponto", "correcao", "ponto_fechado"]
+                  },
                   "ponto_id": {
                     "type": "integer",
                     "description": "Obrigatório para correcao e ponto_fechado"
                   },
-                  "mensagem": { "type": "string", "minLength": 10, "maxLength": 1000 },
-                  "email_contato": { "type": "string", "format": "email" },
+                  "mensagem": {
+                    "type": "string",
+                    "minLength": 10,
+                    "maxLength": 1000
+                  },
+                  "email_contato": {
+                    "type": "string",
+                    "format": "email"
+                  },
                   "consentimento": {
                     "type": "boolean",
                     "description": "Obrigatório (true) se email_contato for enviado (LGPD)"
@@ -160,9 +302,15 @@
           }
         },
         "responses": {
-          "201": { "description": "Criada" },
-          "400": { "$ref": "#/components/responses/Erro" },
-          "429": { "$ref": "#/components/responses/Erro" }
+          "201": {
+            "description": "Criada"
+          },
+          "400": {
+            "$ref": "#/components/responses/Erro"
+          },
+          "429": {
+            "$ref": "#/components/responses/Erro"
+          }
         }
       }
     },
@@ -170,7 +318,11 @@
       "get": {
         "tags": ["Público"],
         "summary": "Totais por tipo, município e categoria",
-        "responses": { "200": { "description": "OK" } }
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
       }
     },
     "/auth/login": {
@@ -184,15 +336,29 @@
               "schema": {
                 "type": "object",
                 "required": ["email", "senha"],
-                "properties": { "email": { "type": "string" }, "senha": { "type": "string" } }
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  },
+                  "senha": {
+                    "type": "string"
+                  }
+                }
               },
-              "example": { "email": "admin@ecoeletro.local", "senha": "trocar123" }
+              "example": {
+                "email": "admin@ecoeletro.local",
+                "senha": "trocar123"
+              }
             }
           }
         },
         "responses": {
-          "200": { "description": "Retorna { token, expira_em, usuario }" },
-          "401": { "$ref": "#/components/responses/Erro" }
+          "200": {
+            "description": "Retorna { token, expira_em, usuario }"
+          },
+          "401": {
+            "$ref": "#/components/responses/Erro"
+          }
         }
       }
     },
@@ -200,24 +366,61 @@
       "get": {
         "tags": ["Admin"],
         "summary": "Lista todos os pontos, inclusive inativos",
-        "security": [{ "bearer": [] }],
-        "parameters": [
-          { "name": "page", "in": "query", "schema": { "type": "integer" } },
-          { "name": "limit", "in": "query", "schema": { "type": "integer" } }
+        "security": [
+          {
+            "bearer": []
+          }
         ],
-        "responses": { "200": { "description": "OK" }, "401": { "$ref": "#/components/responses/Erro" } }
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Erro"
+          }
+        }
       },
       "post": {
         "tags": ["Admin"],
         "summary": "Cadastra um ponto",
         "description": "Sem latitude/longitude, o endereço é geocodificado automaticamente (Nominatim, depois CEP).",
-        "security": [{ "bearer": [] }],
-        "requestBody": { "$ref": "#/components/requestBodies/Ponto" },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/Ponto"
+        },
         "responses": {
-          "201": { "description": "Criado" },
-          "400": { "$ref": "#/components/responses/Erro" },
-          "409": { "$ref": "#/components/responses/Erro" },
-          "422": { "$ref": "#/components/responses/Erro" }
+          "201": {
+            "description": "Criado"
+          },
+          "400": {
+            "$ref": "#/components/responses/Erro"
+          },
+          "409": {
+            "$ref": "#/components/responses/Erro"
+          },
+          "422": {
+            "$ref": "#/components/responses/Erro"
+          }
         }
       }
     },
@@ -225,24 +428,71 @@
       "get": {
         "tags": ["Admin"],
         "summary": "Detalhe (inclusive inativo)",
-        "security": [{ "bearer": [] }],
-        "parameters": [{ "$ref": "#/components/parameters/id" }],
-        "responses": { "200": { "description": "OK" }, "404": { "$ref": "#/components/responses/Erro" } }
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "$ref": "#/components/responses/Erro"
+          }
+        }
       },
       "put": {
         "tags": ["Admin"],
         "summary": "Substitui os dados de um ponto",
-        "security": [{ "bearer": [] }],
-        "parameters": [{ "$ref": "#/components/parameters/id" }],
-        "requestBody": { "$ref": "#/components/requestBodies/Ponto" },
-        "responses": { "200": { "description": "OK" }, "404": { "$ref": "#/components/responses/Erro" } }
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/id"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/Ponto"
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "$ref": "#/components/responses/Erro"
+          }
+        }
       },
       "delete": {
         "tags": ["Admin"],
         "summary": "Desativa um ponto (somente papel admin)",
-        "security": [{ "bearer": [] }],
-        "parameters": [{ "$ref": "#/components/parameters/id" }],
-        "responses": { "200": { "description": "OK" }, "403": { "$ref": "#/components/responses/Erro" } }
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "403": {
+            "$ref": "#/components/responses/Erro"
+          }
+        }
       }
     },
     "/admin/pontos/importar": {
@@ -250,67 +500,125 @@
         "tags": ["Admin"],
         "summary": "Importa pontos de um CSV (somente papel admin)",
         "description": "Separador `;` ou `,`. Colunas: nome, tipo, logradouro, numero, bairro, cep, municipio, latitude, longitude, telefone, email, site, horario (JSON), observacoes, categorias (separadas por `|`). Máximo de 200 linhas. Veja backend/seed/exemplo-importacao.csv.",
-        "security": [{ "bearer": [] }],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
             "multipart/form-data": {
               "schema": {
                 "type": "object",
-                "properties": { "arquivo": { "type": "string", "format": "binary" } }
+                "properties": {
+                  "arquivo": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
               }
             }
           }
         },
-        "responses": { "200": { "description": "Retorna { total_linhas, criados, atualizados, erros[] }" } }
+        "responses": {
+          "200": {
+            "description": "Retorna { total_linhas, criados, atualizados, erros[] }"
+          }
+        }
       }
     },
     "/admin/sugestoes": {
       "get": {
         "tags": ["Admin"],
         "summary": "Lista sugestões",
-        "security": [{ "bearer": [] }],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "status",
             "in": "query",
-            "schema": { "type": "string", "enum": ["pendente", "aprovada", "rejeitada"] }
+            "schema": {
+              "type": "string",
+              "enum": ["pendente", "aprovada", "rejeitada"]
+            }
           }
         ],
-        "responses": { "200": { "description": "OK" } }
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
       }
     },
     "/admin/sugestoes/{id}": {
       "patch": {
         "tags": ["Admin"],
         "summary": "Aprova ou rejeita uma sugestão",
-        "security": [{ "bearer": [] }],
-        "parameters": [{ "$ref": "#/components/parameters/id" }],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/id"
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": { "status": { "type": "string", "enum": ["aprovada", "rejeitada"] } }
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": ["aprovada", "rejeitada"]
+                  }
+                }
               }
             }
           }
         },
-        "responses": { "200": { "description": "OK" }, "404": { "$ref": "#/components/responses/Erro" } }
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "$ref": "#/components/responses/Erro"
+          }
+        }
       }
     }
   },
   "components": {
     "securitySchemes": {
-      "bearer": { "type": "http", "scheme": "bearer", "bearerFormat": "JWT" }
+      "bearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
     },
     "parameters": {
-      "id": { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } },
+      "id": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer"
+        }
+      },
       "tipo": {
         "name": "tipo",
         "in": "query",
-        "schema": { "type": "string", "enum": ["ecoponto", "loja_parceira", "cooperativa", "orgao_publico"] }
+        "schema": {
+          "type": "string",
+          "enum": ["ecoponto", "loja_parceira", "cooperativa", "orgao_publico"]
+        }
       }
     },
     "requestBodies": {
@@ -322,26 +630,65 @@
               "type": "object",
               "required": ["nome", "tipo", "logradouro", "bairro", "cep", "municipio", "categorias"],
               "properties": {
-                "nome": { "type": "string" },
+                "nome": {
+                  "type": "string"
+                },
                 "tipo": {
                   "type": "string",
                   "enum": ["ecoponto", "loja_parceira", "cooperativa", "orgao_publico"]
                 },
-                "logradouro": { "type": "string" },
-                "numero": { "type": "string" },
-                "bairro": { "type": "string" },
-                "cep": { "type": "string" },
-                "municipio": { "type": "string" },
-                "latitude": { "type": "number" },
-                "longitude": { "type": "number" },
-                "telefone": { "type": "string" },
-                "email": { "type": "string" },
-                "site": { "type": "string" },
-                "horario": { "type": "object", "additionalProperties": { "type": "string" } },
-                "observacoes": { "type": "string" },
-                "categorias": { "type": "array", "items": { "type": "string" } },
-                "ativo": { "type": "boolean" },
-                "verificado_em": { "type": "string", "format": "date" }
+                "logradouro": {
+                  "type": "string"
+                },
+                "numero": {
+                  "type": "string"
+                },
+                "bairro": {
+                  "type": "string"
+                },
+                "cep": {
+                  "type": "string"
+                },
+                "municipio": {
+                  "type": "string"
+                },
+                "latitude": {
+                  "type": "number"
+                },
+                "longitude": {
+                  "type": "number"
+                },
+                "telefone": {
+                  "type": "string"
+                },
+                "email": {
+                  "type": "string"
+                },
+                "site": {
+                  "type": "string"
+                },
+                "horario": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                },
+                "observacoes": {
+                  "type": "string"
+                },
+                "categorias": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "ativo": {
+                  "type": "boolean"
+                },
+                "verificado_em": {
+                  "type": "string",
+                  "format": "date"
+                }
               }
             },
             "example": {
@@ -352,7 +699,9 @@
               "bairro": "Praia do Canto",
               "cep": "29055-131",
               "municipio": "Vitória",
-              "horario": { "seg-sex": "08:00-17:00" },
+              "horario": {
+                "seg-sex": "08:00-17:00"
+              },
               "categorias": ["pilhas-baterias", "celulares-tablets"]
             }
           }
@@ -362,7 +711,13 @@
     "responses": {
       "Erro": {
         "description": "Erro",
-        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Erro" } } }
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Erro"
+            }
+          }
+        }
       }
     },
     "schemas": {
@@ -372,9 +727,20 @@
           "erro": {
             "type": "object",
             "properties": {
-              "codigo": { "type": "string", "example": "CEP_FORA_DO_ES" },
-              "mensagem": { "type": "string", "example": "Este CEP não pertence ao Espírito Santo." },
-              "detalhes": { "type": "array", "items": { "type": "object" } }
+              "codigo": {
+                "type": "string",
+                "example": "CEP_FORA_DO_ES"
+              },
+              "mensagem": {
+                "type": "string",
+                "example": "Este CEP não pertence ao Espírito Santo."
+              },
+              "detalhes": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              }
             }
           }
         }
@@ -382,56 +748,144 @@
       "Ponto": {
         "type": "object",
         "properties": {
-          "id": { "type": "integer" },
-          "nome": { "type": "string" },
-          "tipo": { "type": "string" },
-          "distancia_km": { "type": "number", "description": "Só em /pontos/proximos" },
-          "endereco": { "type": "string" },
-          "cep": { "type": "string" },
-          "municipio": { "type": "string" },
-          "latitude": { "type": "number" },
-          "longitude": { "type": "number" },
-          "telefone": { "type": "string", "nullable": true },
-          "horario": { "type": "object", "nullable": true },
-          "categorias": { "type": "array", "items": { "type": "string" } },
-          "como_chegar": { "type": "string" }
+          "id": {
+            "type": "integer"
+          },
+          "nome": {
+            "type": "string"
+          },
+          "tipo": {
+            "type": "string"
+          },
+          "distancia_km": {
+            "type": "number",
+            "description": "Só em /pontos/proximos. De carro pelas ruas (ou linha reta, ver distancia_tipo)"
+          },
+          "endereco": {
+            "type": "string"
+          },
+          "cep": {
+            "type": "string"
+          },
+          "municipio": {
+            "type": "string"
+          },
+          "latitude": {
+            "type": "number"
+          },
+          "longitude": {
+            "type": "number"
+          },
+          "telefone": {
+            "type": "string",
+            "nullable": true
+          },
+          "horario": {
+            "type": "object",
+            "nullable": true
+          },
+          "categorias": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "como_chegar": {
+            "type": "string"
+          },
+          "distancia_tipo": {
+            "type": "string",
+            "enum": ["carro", "linha_reta"]
+          },
+          "duracao_min": {
+            "type": "integer",
+            "description": "Tempo estimado de carro (quando distancia_tipo = carro)"
+          },
+          "distancia_reta_km": {
+            "type": "number"
+          }
         }
       },
       "ListaPontos": {
         "type": "object",
         "properties": {
-          "total": { "type": "integer" },
-          "page": { "type": "integer" },
-          "limit": { "type": "integer" },
-          "paginas": { "type": "integer" },
-          "pontos": { "type": "array", "items": { "$ref": "#/components/schemas/Ponto" } }
+          "total": {
+            "type": "integer"
+          },
+          "page": {
+            "type": "integer"
+          },
+          "limit": {
+            "type": "integer"
+          },
+          "paginas": {
+            "type": "integer"
+          },
+          "pontos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Ponto"
+            }
+          }
         }
       },
       "Cep": {
         "type": "object",
         "properties": {
-          "cep": { "type": "string" },
-          "logradouro": { "type": "string", "nullable": true },
-          "bairro": { "type": "string", "nullable": true },
-          "cidade": { "type": "string" },
-          "uf": { "type": "string" },
-          "latitude": { "type": "number" },
-          "longitude": { "type": "number" },
+          "cep": {
+            "type": "string"
+          },
+          "logradouro": {
+            "type": "string",
+            "nullable": true
+          },
+          "bairro": {
+            "type": "string",
+            "nullable": true
+          },
+          "cidade": {
+            "type": "string"
+          },
+          "uf": {
+            "type": "string"
+          },
+          "latitude": {
+            "type": "number"
+          },
+          "longitude": {
+            "type": "number"
+          },
           "fonte": {
             "type": "string",
             "enum": ["nominatim", "nominatim_bairro", "brasilapi", "centro_municipio", "nominatim_cidade"]
           },
-          "precisao": { "type": "string", "enum": ["endereco", "bairro", "municipio"] }
+          "precisao": {
+            "type": "string",
+            "enum": ["endereco", "bairro", "municipio"]
+          }
         }
       },
       "Proximos": {
         "type": "object",
         "properties": {
-          "origem": { "type": "object" },
-          "raio_km": { "type": "number" },
-          "fora_do_raio": { "type": "boolean" },
-          "total": { "type": "integer" },
-          "pontos": { "type": "array", "items": { "$ref": "#/components/schemas/Ponto" } }
+          "origem": {
+            "type": "object"
+          },
+          "raio_km": {
+            "type": "number"
+          },
+          "fora_do_raio": {
+            "type": "boolean"
+          },
+          "total": {
+            "type": "integer"
+          },
+          "pontos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Ponto"
+            }
+          }
         }
       }
     }

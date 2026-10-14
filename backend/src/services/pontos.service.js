@@ -4,6 +4,7 @@ import { formatarCep } from '../utils/cep.js';
 import { dentroDoES, distanciaKm, linkComoChegar } from '../utils/geo.js';
 import { resolverCep } from './cep.service.js';
 import { geocodificar } from './geocodificacao.service.js';
+import { distanciasDeCarro, MAXIMO_DESTINOS } from './rotas.service.js';
 import { encontrarMunicipioPorNome, obterOuCriarMunicipio } from './municipios.service.js';
 
 const incluir = { municipio: true, categorias: { include: { categoria: true } } };
@@ -19,14 +20,22 @@ function lerHorario(texto) {
 
 /**
  * Converte o registro do banco no formato da API (snake_case, endereço pronto, link de rota).
- * Em buscas por proximidade, recebe a distância e a origem (CEP ou GPS) para a rota partir de lá.
+ * Em buscas por proximidade, recebe a medida ({ reta, rota? }) e a origem (CEP ou GPS),
+ * para mostrar a distância de carro e a rota partir de lá.
  */
-function formatarPonto(ponto, distancia, origem) {
+function formatarPonto(ponto, medida, origem) {
+  const umaCasa = (km) => Math.round(km * 10) / 10;
   return {
     id: ponto.id,
     nome: ponto.nome,
     tipo: ponto.tipo,
-    ...(distancia !== undefined && { distancia_km: Math.round(distancia * 10) / 10 }),
+    ...(medida && {
+      // De carro pelas ruas quando o roteamento respondeu; senão, linha reta.
+      distancia_km: umaCasa(medida.rota ? medida.rota.distanciaKm : medida.reta),
+      distancia_tipo: medida.rota ? 'carro' : 'linha_reta',
+      ...(medida.rota && { duracao_min: medida.rota.duracaoMin }),
+      distancia_reta_km: umaCasa(medida.reta),
+    }),
     endereco: `${ponto.logradouro}, ${ponto.numero} - ${ponto.bairro}, ${ponto.municipio.nome} - ES`,
     logradouro: ponto.logradouro,
     numero: ponto.numero,
@@ -106,30 +115,76 @@ export async function buscarProximos({ cep, lat, lng, raio, limite, categoria, t
     origem = { latitude: lat, longitude: lng, precisao: 'gps' };
   }
 
-  // Com algumas centenas de pontos, calcular a distância em memória é suficiente.
+  // Com algumas centenas de pontos, calcular a linha reta em memória é suficiente.
   // Com milhares, troque por uma consulta PostGIS (ST_DWithin).
   const candidatos = await prisma.pontoColeta.findMany({
     where: await montarFiltro({ categoria, tipo }),
     include: incluir,
   });
-  const ordenados = candidatos
+  const porLinhaReta = candidatos
     .map((ponto) => ({
       ponto,
-      distancia: distanciaKm(origem.latitude, origem.longitude, ponto.latitude, ponto.longitude),
+      reta: distanciaKm(origem.latitude, origem.longitude, ponto.latitude, ponto.longitude),
     }))
-    .sort((a, b) => a.distancia - b.distancia);
+    .sort((a, b) => a.reta - b.reta);
 
-  const noRaio = ordenados.filter((item) => item.distancia <= raio);
-  const foraDoRaio = noRaio.length === 0;
-  const selecionados = foraDoRaio ? ordenados.slice(0, 1) : noRaio.slice(0, limite);
+  // A rota pela rua nunca é mais curta que a linha reta: só quem está no alcance em linha reta
+  // pode estar no alcance de carro. Assim o OSRM só calcula esses (numa consulta só).
+  const noAlcanceReto = porLinhaReta.filter((item) => item.reta <= raio).slice(0, MAXIMO_DESTINOS);
+  const rotas = await distanciasDeCarro(
+    origem,
+    noAlcanceReto.map((item) => item.ponto),
+  );
 
+  let porCarro = rotas !== null;
+  let medidos = porCarro
+    ? noAlcanceReto
+        .map((item, i) => ({ ...item, rota: rotas[i] }))
+        .filter((item) => item.rota && item.rota.distanciaKm <= raio)
+        .sort((a, b) => a.rota.distanciaKm - b.rota.distanciaKm)
+    : noAlcanceReto;
+
+  const foraDoAlcance = medidos.length === 0;
+  if (foraDoAlcance) {
+    medidos = await maisProximoDeCarro(origem, porLinhaReta, porCarro);
+    porCarro = medidos[0]?.rota !== undefined;
+  }
+
+  const selecionados = medidos.slice(0, limite);
   return {
     origem,
     raio_km: raio,
-    fora_do_raio: foraDoRaio,
+    distancia_tipo: porCarro ? 'carro' : 'linha_reta',
+    fora_do_raio: foraDoAlcance,
     total: selecionados.length,
-    pontos: selecionados.map((item) => formatarPonto(item.ponto, item.distancia, origem)),
+    pontos: selecionados.map((item) =>
+      formatarPonto(item.ponto, { reta: item.reta, rota: porCarro ? item.rota : undefined }, origem),
+    ),
   };
+}
+
+/**
+ * Nenhum ponto no alcance: devolve só o mais próximo, a qualquer distância.
+ * Entre os 5 mais próximos em linha reta, escolhe o de menor trajeto de carro
+ * (o mais perto "de avião" pode ficar do outro lado de uma baía).
+ */
+async function maisProximoDeCarro(origem, porLinhaReta, tentarCarro) {
+  const finalistas = porLinhaReta.slice(0, 5);
+  if (finalistas.length === 0) return [];
+
+  const rotas = tentarCarro
+    ? await distanciasDeCarro(
+        origem,
+        finalistas.map((item) => item.ponto),
+      )
+    : null;
+  if (rotas === null) return finalistas.slice(0, 1);
+
+  const comRota = finalistas
+    .map((item, i) => ({ ...item, rota: rotas[i] }))
+    .filter((item) => item.rota)
+    .sort((a, b) => a.rota.distanciaKm - b.rota.distanciaKm);
+  return comRota.length ? comRota.slice(0, 1) : finalistas.slice(0, 1);
 }
 
 // ---------- Administração ----------

@@ -22,5 +22,8 @@ export const env = {
   ),
   nominatimUserAgent: process.env.NOMINATIM_USER_AGENT || 'EcoEletroES/1.0 (projeto academico PEI II)',
   timeoutExternoMs: Number(process.env.TIMEOUT_EXTERNO_MS) || 5000,
+  // Distância de carro pelas ruas (OSRM). "desligado" = só linha reta (usado nos testes, sem internet).
+  roteamentoAtivo: process.env.ROTEAMENTO !== 'desligado',
+  osrmUrl: (process.env.OSRM_URL || 'https://router.project-osrm.org').replace(/\/$/, ''),
   cepCacheDias: Number(process.env.CEP_CACHE_DIAS) || 90,
 };

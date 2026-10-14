@@ -85,13 +85,19 @@
     return `${km.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} km`;
   }
 
+  // "11,3 km de carro · 14 min" ou, se o serviço de rotas falhou, "≈ 5,3 km em linha reta".
+  function descreverDistancia(ponto) {
+    if (ponto.distancia_tipo === 'carro') {
+      return `${formatarDistancia(ponto.distancia_km)} de carro · ${ponto.duracao_min} min`;
+    }
+    return `≈ ${formatarDistancia(ponto.distancia_km)} em linha reta`;
+  }
+
   // ---------- Balão do marcador (todos os detalhes ficam aqui) ----------
 
   function htmlPopup(ponto) {
     const distancia =
-      ponto.distancia_km !== undefined
-        ? `<p class="popup-distancia">a ${formatarDistancia(ponto.distancia_km)} de você</p>`
-        : '';
+      ponto.distancia_km !== undefined ? `<p class="popup-distancia">${descreverDistancia(ponto)}</p>` : '';
     const horario = ponto.horario
       ? `<ul class="popup-horario">${Object.entries(ponto.horario)
           .map(([dias, horas]) => `<li><strong>${escapar(dias)}</strong> ${escapar(horas)}</li>`)
@@ -126,9 +132,11 @@
   // ---------- Lista lateral (compacta) ----------
 
   function htmlItemLista(ponto) {
+    const prefixo = ponto.distancia_tipo === 'linha_reta' ? '≈ ' : '';
+    const tempo = ponto.duracao_min ? `<span class="item-tempo">${ponto.duracao_min} min</span>` : '';
     const distancia =
       ponto.distancia_km !== undefined
-        ? `<span class="item-distancia">${formatarDistancia(ponto.distancia_km)}</span>`
+        ? `<span class="item-distancia">${prefixo}${formatarDistancia(ponto.distancia_km)}${tempo}</span>`
         : '';
     return `
       <li>
@@ -245,6 +253,8 @@
         busca.tipo === 'cep' ? `cep=${busca.cep}` : `lat=${busca.latitude}&lng=${busca.longitude}`;
       const dados = await chamarApi(`/pontos/proximos?${origem}&raio=${el.raio.value}${parametrosFiltro()}`);
       const raio = dados.raio_km;
+      const deCarro = dados.distancia_tipo === 'carro';
+      const medida = deCarro ? 'de carro' : 'em linha reta';
       desenhar(dados.pontos, dados.origem, raio);
 
       const avisos = [];
@@ -252,7 +262,7 @@
         const maisProximo = dados.pontos[0];
         el.tituloLista.textContent = 'Ponto mais próximo';
         avisos.push(
-          `Nenhum ponto até ${raio} km. O mais próximo fica a ${formatarDistancia(maisProximo.distancia_km)}, em ${maisProximo.municipio}.`,
+          `Nenhum ponto até ${raio} km ${medida}. O mais próximo fica a ${descreverDistancia(maisProximo)}, em ${maisProximo.municipio}.`,
         );
       } else if (dados.fora_do_raio) {
         el.tituloLista.textContent = 'Nenhum ponto';
@@ -260,9 +270,10 @@
       } else {
         el.tituloLista.textContent = `${dados.total} ${dados.total === 1 ? 'ponto' : 'pontos'} até ${raio} km`;
         avisos.push(
-          `${dados.total} ${dados.total === 1 ? 'ponto encontrado' : 'pontos encontrados'} a até ${raio} km.`,
+          `${dados.total} ${dados.total === 1 ? 'ponto encontrado' : 'pontos encontrados'} a até ${raio} km ${medida}.`,
         );
       }
+      if (!deCarro) avisos.push('O serviço de rotas não respondeu: distâncias aproximadas em linha reta.');
       if (dados.origem.precisao === 'municipio') {
         avisos.push(`Localização aproximada pelo centro de ${dados.origem.cidade}.`);
       } else if (dados.origem.precisao === 'bairro') {

@@ -329,6 +329,14 @@ body {
   font-weight: bold;
 }
 
+.item-tempo {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: normal;
+  text-align: right;
+}
+
 .item-detalhe {
   display: block;
   color: var(--text-muted);
