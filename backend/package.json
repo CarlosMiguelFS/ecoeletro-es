@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "description": "API do EcoEletro ES — pontos de coleta de lixo eletrônico no Espírito Santo (Projeto PEI II)",
   "type": "module",
-  "main": "src/server.js",
+  "main": "src/servidor.js",
   "scripts": {
-    "dev": "node --env-file-if-exists=.env --watch src/server.js",
-    "start": "node --env-file-if-exists=.env src/server.js",
+    "dev": "node --env-file-if-exists=.env --watch src/servidor.js",
+    "start": "node --env-file-if-exists=.env src/servidor.js",
     "db:push": "prisma db push",
     "db:seed": "node --env-file-if-exists=.env prisma/seed.js",
     "db:setup": "prisma db push && node --env-file-if-exists=.env prisma/seed.js",

@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict';
 import { after, before, describe, it } from 'node:test';
 import request from 'supertest';
-import { criarApp } from '../src/app.js';
+import { criarApp } from '../src/aplicacao.js';
 import { prisma } from '../src/config/db.js';
 
 const app = criarApp();

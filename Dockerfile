@@ -27,4 +27,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=30s \
   CMD wget -qO- http://localhost:3000/api/saude || exit 1
 
 # Cria/atualiza as tabelas, carrega os pontos (upsert, não duplica) e sobe o servidor.
-CMD ["sh", "-c", "npx prisma db push --skip-generate && node prisma/seed.js && node src/server.js"]
+CMD ["sh", "-c", "npx prisma db push --skip-generate && node prisma/seed.js && node src/servidor.js"]

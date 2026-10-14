@@ -1,4 +1,4 @@
-import { criarApp } from './app.js';
+import { criarApp } from './aplicacao.js';
 import { prisma } from './config/db.js';
 import { env } from './config/env.js';
 

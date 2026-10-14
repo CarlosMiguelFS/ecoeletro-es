@@ -267,8 +267,8 @@ Padrão de erro (o mesmo para todas as rotas):
 ```
 backend/
 ├── src/
-│   ├── server.js              # sobe o Express
-│   ├── app.js                 # middlewares (helmet, cors, json, rate-limit), rotas e site estático
+│   ├── servidor.js            # sobe o Express (local e Docker)
+│   ├── aplicacao.js           # middlewares (helmet, cors, json, rate-limit), rotas e site estático
 │   ├── config/                # env.js (lê o .env), db.js (Prisma)
 │   ├── routes/                # publicas, pontos, auth, admin — validam a entrada e chamam os services
 │   ├── services/              # regras: pontos, cep, geocodificacao, municipios, sugestoes, catalogo, auth, importacao
