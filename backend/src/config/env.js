@@ -1,5 +1,6 @@
 const producao = process.env.NODE_ENV === 'production';
 
+// sem segredo em produção não sobe. Melhor travar aqui do que descobrir depois
 if (producao && !process.env.JWT_SECRET) {
   throw new Error('JWT_SECRET é obrigatório em produção.');
 }
@@ -18,12 +19,12 @@ export const env = {
   jwtExpiracao: process.env.JWT_EXPIRACAO || '8h',
   corsOrigens: lista(
     process.env.CORS_ORIGINS,
-    'http://localhost:5500,http://127.0.0.1:5500,http://localhost:3000',
+    'http://localhost:5500,http://127.0.0.1:5500,http://localhost:3000', // 5500 = Live Server
   ),
   nominatimUserAgent: process.env.NOMINATIM_USER_AGENT || 'EcoEletroES/1.0 (projeto academico PEI II)',
   timeoutExternoMs: Number(process.env.TIMEOUT_EXTERNO_MS) || 5000,
-  // Distância de carro pelas ruas (OSRM). "desligado" = só linha reta (usado nos testes, sem internet).
+  // distância de carro pelo OSRM. Nos testes fica "desligado" e cai pra linha reta
   roteamentoAtivo: process.env.ROTEAMENTO !== 'desligado',
   osrmUrl: (process.env.OSRM_URL || 'https://router.project-osrm.org').replace(/\/$/, ''),
-  cepCacheDias: Number(process.env.CEP_CACHE_DIAS) || 90,
+  cepCacheDias: Number(process.env.CEP_CACHE_DIAS) || 90, // CEP não muda de lugar. Normalmente.
 };

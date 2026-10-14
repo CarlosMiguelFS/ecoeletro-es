@@ -9,7 +9,7 @@ rotasPontos.get('/', validar({ query: esquemaListagem }), async (req, res) => {
   res.json(await listarPontos(req.dados.query));
 });
 
-// Antes de "/:id", senão "proximos" seria lido como id.
+// tem que vir antes do "/:id", senão o Express acha que "proximos" é um id. E aí, qual o id de "proximos"?
 rotasPontos.get('/proximos', validar({ query: esquemaProximos }), async (req, res) => {
   res.json(await buscarProximos(req.dados.query));
 });

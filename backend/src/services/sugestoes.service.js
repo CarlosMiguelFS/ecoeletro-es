@@ -14,7 +14,7 @@ export async function criarSugestao(dados) {
       emailContato: dados.email_contato ?? null,
     },
   });
-  // Não devolve o e-mail: a resposta é pública.
+  // o e-mail fica guardado com a gente, não volta na resposta (LGPD manda lembranças)
   return { id: sugestao.id, status: sugestao.status, mensagem: 'Obrigado! Sua sugestão será analisada.' };
 }
 

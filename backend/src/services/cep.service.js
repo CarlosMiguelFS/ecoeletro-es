@@ -7,8 +7,9 @@ import { buscarJson } from '../utils/http.js';
 import { geocodificar } from './geocodificacao.service.js';
 import { encontrarMunicipioPorNome } from './municipios.service.js';
 
-// Quão exata é a coordenada, conforme a fonte que a forneceu.
-// A BrasilAPI (base open-cep) devolve o centro da cidade, não o do CEP — por isso "municipio".
+// Quão confiável é a coordenada, dependendo de quem respondeu.
+// Detalhe que custou caro descobrir: a BrasilAPI devolve o CENTRO DA CIDADE, não o do CEP.
+// Por isso ela é "municipio", e não "endereco".
 const PRECISAO = {
   nominatim: 'endereco',
   nominatim_bairro: 'bairro',
@@ -23,14 +24,17 @@ function numeroOuNull(valor) {
   return Number.isFinite(numero) ? numero : null;
 }
 
-// As consultas retornam: objeto = encontrado | null = a API disse que não existe | undefined = a API falhou.
+// Combinado das funções abaixo (é meio feio, mas funciona):
+//   objeto    → achou
+//   null      → a API disse "esse CEP não existe"
+//   undefined → a API nem respondeu direito
 
 async function consultarBrasilApi(cep) {
   try {
     const { status, ok, corpo } = await buscarJson(`https://brasilapi.com.br/api/cep/v2/${cep}`);
     if (status === 404 || status === 400) return null;
     if (!ok || !corpo) return undefined;
-    // A v2 nem sempre traz coordenadas: "coordinates" pode vir como {}.
+    // às vezes vem coordinates: {} vazio. E quando vem, é o centro da cidade (ver PRECISAO lá em cima)
     const coordenadas = corpo.location?.coordinates ?? {};
     return {
       logradouro: corpo.street || null,
@@ -51,7 +55,7 @@ async function consultarViaCep(cep) {
     const { status, ok, corpo } = await buscarJson(`https://viacep.com.br/ws/${cep}/json/`);
     if (status === 400) return null;
     if (!ok || !corpo) return undefined;
-    // CEP inexistente responde HTTP 200 com { "erro": true }.
+    // clássico do ViaCEP: CEP que não existe responde 200 OK com { "erro": true }. Sucesso no erro.
     if (corpo.erro) return null;
     return {
       logradouro: corpo.logradouro || null,
@@ -67,10 +71,12 @@ async function consultarViaCep(cep) {
   }
 }
 
-/**
- * Tenta, do mais preciso ao menos preciso: Nominatim pela rua → Nominatim pelo bairro →
- * coordenada da BrasilAPI → centro do município cadastrado → Nominatim pela cidade.
- */
+// Vai descendo a escada, do mais preciso pro menos preciso:
+//   1. rua (Nominatim)
+//   2. bairro (Nominatim). A rua às vezes falha por grafia: "Vellozo" x "Veloso"
+//   3. coordenada da BrasilAPI (centro da cidade)
+//   4. centro do município que a gente tem no banco
+//   5. cidade (Nominatim), última esperança
 async function descobrirCoordenadas(endereco) {
   if (endereco.logradouro && endereco.cidade) {
     const achado = await geocodificar({ logradouro: endereco.logradouro, cidade: endereco.cidade });
@@ -120,7 +126,7 @@ function formatar(registro) {
 const expirado = (registro) =>
   Date.now() - registro.atualizadoEm.getTime() > env.cepCacheDias * 24 * 60 * 60 * 1000;
 
-/** CEP → endereço + coordenadas, com cache no banco (tabela cep_cache). */
+// CEP → endereço + coordenadas. Guarda no banco (cep_cache) pra não perguntar de novo amanhã.
 export async function resolverCep(entrada) {
   const cep = normalizarCep(entrada);
   if (!cep) throw new AppError(400, 'CEP_INVALIDO', 'Informe um CEP com 8 dígitos.');
@@ -138,7 +144,7 @@ export async function resolverCep(entrada) {
     if (viaCep) {
       endereco = viaCep;
     } else {
-      if (emCache) return formatar(emCache); // dado antigo é melhor do que nenhum
+      if (emCache) return formatar(emCache); // vencido, mas melhor que nada
       if (brasilApi === null || viaCep === null) {
         throw new AppError(404, 'CEP_NAO_ENCONTRADO', 'CEP não encontrado.');
       }

@@ -38,7 +38,7 @@ export const esquemaPonto = z
     nome: z.string().trim().min(3).max(120),
     tipo: z.enum(TIPOS_PONTO),
     logradouro: z.string().trim().min(3).max(200),
-    // "s/n", "sn" e "S/N" viram "S/N".
+    // "s/n", "sn", "S/N"... cada fonte escreve de um jeito. Aqui vira tudo "S/N"
     numero: z
       .string()
       .trim()
@@ -46,7 +46,7 @@ export const esquemaPonto = z
       .transform((n) => (/^s\/?n$/i.test(n) ? 'S/N' : n))
       .optional(),
     bairro: z.string().trim().min(2).max(120),
-    // Opcional: muitas fontes oficiais não informam o CEP. Quando vier, precisa ser do ES.
+    // opcional porque muita prefeitura publica endereço sem CEP 🤷. Se vier, tem que ser do ES
     cep: z
       .string()
       .transform(normalizarCep)

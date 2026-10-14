@@ -11,20 +11,20 @@ import { rotasAdmin } from './routes/admin.routes.js';
 import { rotasAuth } from './routes/auth.routes.js';
 import { rotasPublicas } from './routes/publicas.routes.js';
 
-// No Vercel o site é servido pela CDN (pasta public/); localmente e no Docker, por aqui.
+// local e Docker: o próprio Express entrega o site. No Vercel quem entrega é a CDN (pasta public/)
 const pastaFrontend = fileURLToPath(new URL('../../frontend', import.meta.url));
 
 function origemPermitida(origem, callback) {
-  // Sem Origin = mesmo site, curl ou Postman. "null" = HTML aberto com dois cliques (file://), só em dev.
+  // sem Origin = mesmo site, curl ou Postman
+  // "null" = alguém abriu o index.html com dois cliques (só deixamos em dev)
   const permitida = !origem || env.corsOrigens.includes(origem) || (!env.producao && origem === 'null');
   callback(null, permitida);
 }
 
-/** Configura middlewares e rotas no app recebido (o index.js do Vercel cria o app com express()). */
 export function criarApp(app = express()) {
   app.set('trust proxy', 1);
 
-  // Documentação antes do helmet, porque o Swagger UI não funciona com a CSP abaixo.
+  // docs ANTES do helmet, senão a CSP lá embaixo barra o Swagger
   app.get('/api/openapi.json', (req, res) => res.json(openapi));
   app.get(['/api/docs', '/api/docs/'], (req, res) => res.type('html').send(paginaDocs));
 
@@ -38,8 +38,8 @@ export function criarApp(app = express()) {
           'upgrade-insecure-requests': null,
         },
       },
-      // O padrão do helmet (no-referrer) faz o OpenStreetMap bloquear os tiles com 403:
-      // a política de uso deles exige o Referer. Este valor envia só a origem (sem caminho) para outros sites.
+      // NÃO MEXER. Com o padrão do helmet (no-referrer) o OpenStreetMap bloqueia o mapa
+      // inteiro com 403. Descobrimos isso do jeito mais difícil: no meio de um teste.
       referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
     }),
   );
@@ -49,14 +49,14 @@ export function criarApp(app = express()) {
     '/api',
     rateLimit({
       windowMs: 60 * 1000,
-      limit: 120,
+      limit: 120, // 2 por segundo. Ninguém procura ecoponto tão rápido assim
       standardHeaders: 'draft-7',
       legacyHeaders: false,
       message: { erro: { codigo: 'MUITAS_REQUISICOES', mensagem: 'Muitas requisições. Aguarde um minuto.' } },
     }),
   );
 
-  app.get('/api/saude', (req, res) => res.json({ status: 'ok' }));
+  app.get('/api/saude', (req, res) => res.json({ status: 'ok' })); // tá vivo!
   app.use('/api/auth', rotasAuth);
   app.use('/api/admin', rotasAdmin);
   app.use('/api', rotasPublicas);
@@ -64,6 +64,6 @@ export function criarApp(app = express()) {
 
   app.use(express.static(pastaFrontend));
 
-  app.use(tratarErros);
+  app.use(tratarErros); // sempre por último
   return app;
 }

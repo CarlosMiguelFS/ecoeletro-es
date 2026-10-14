@@ -5,17 +5,17 @@ import { AppError } from '../utils/erros.js';
 import { esquemaPonto } from '../validacao/esquemas.js';
 import { AVISO_LOCALIZACAO_APROXIMADA, atualizarPonto, criarPonto } from './pontos.service.js';
 
-// Cada linha sem latitude/longitude custa ~1 s de geocodificação (limite do Nominatim).
+// cada linha sem latitude/longitude custa ~1s de Nominatim. 200 linhas = tempo de um café
 const MAXIMO_LINHAS = 200;
 
-/** Linha do CSV (tudo texto) → objeto no formato do esquemaPonto. */
+// linha do CSV (tudo texto) → objeto que o esquemaPonto entende
 function prepararLinha(linha) {
   const dados = {};
   for (const [coluna, valor] of Object.entries(linha)) {
     if (valor !== '') dados[coluna] = valor;
   }
   if (dados.categorias) dados.categorias = dados.categorias.split('|').map((c) => c.trim());
-  // Excel em português salva decimais com vírgula.
+  // Excel brasileiro: "-20,329". Todo o resto do planeta: "-20.329"
   for (const coluna of ['latitude', 'longitude']) {
     if (dados[coluna]) dados[coluna] = dados[coluna].replace(',', '.');
   }
@@ -32,7 +32,7 @@ function prepararLinha(linha) {
   }
   if (dados.ativo !== undefined)
     dados.ativo = !['false', '0', 'nao', 'não'].includes(dados.ativo.toLowerCase());
-  // Coluna opcional com a data da informação na fonte (ex.: 2024-02-26).
+  // data_info = quando a fonte publicou a informação (ex.: 2024-02-26)
   if (dados.data_info && !dados.verificado_em) dados.verificado_em = dados.data_info;
   return dados;
 }
@@ -44,16 +44,15 @@ function descreverErro(erro) {
   return erro.message;
 }
 
-/**
- * Excel em português salva com ";" e decimal com vírgula ("-20,329"); outros programas usam ",".
- * Aceitar os dois ao mesmo tempo quebraria a vírgula decimal, então o separador vem do cabeçalho.
- */
+// O Excel em português separa colunas com ";" e decimais com ",". Os outros separam colunas com ",".
+// Aceitar os dois ao mesmo tempo partia "-20,329" em duas colunas (aconteceu no primeiro teste, claro).
+// Então quem decide é a primeira linha do arquivo.
 function detectarSeparador(conteudo) {
   const cabecalho = conteudo.toString('utf8').split(/\r?\n/, 1)[0];
   return cabecalho.includes(';') ? ';' : ',';
 }
 
-/** Cria os pontos novos e atualiza os que já existem (mesmo nome + CEP + número). */
+// cria quem é novo e atualiza quem já existe (mesmo nome + CEP + número). Pode rodar 2x sem medo
 export async function importarCsv(conteudo) {
   let linhas;
   try {
@@ -81,7 +80,7 @@ export async function importarCsv(conteudo) {
         where: { nome_cep_numero: { nome: dados.nome, cep: dados.cep ?? '', numero: dados.numero || 'S/N' } },
       });
       if (existente) {
-        // Linha sem coordenadas e endereço igual: reaproveita as já descobertas (evita chamar o Nominatim de novo).
+        // mesmo endereço e sem coordenada na linha? Reaproveita a que já temos. O Nominatim agradece
         const mesmoEndereco = existente.logradouro === dados.logradouro && existente.bairro === dados.bairro;
         if (dados.latitude === undefined && mesmoEndereco) {
           dados.latitude = existente.latitude;

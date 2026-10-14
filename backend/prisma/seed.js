@@ -1,9 +1,9 @@
-// Popula o banco com municípios, categorias, pontos de coleta e o usuário admin.
-// Pode ser executado várias vezes: usa upsert, então não duplica nada.
+// Enche o banco: municípios, categorias, pontos de coleta e o admin.
+// Pode rodar quantas vezes quiser, é tudo upsert e não duplica nada.
 //
-// SEED_DADOS=reais      (padrão) pontos reais de seed/pontos-reais.csv, geocodificados pelo Nominatim
-// SEED_DADOS=ficticios  pontos fictícios de seed/pontos-ficticios.json (usado pelos testes, sem internet)
-// SEED_DADOS=ambos      os dois
+// SEED_DADOS=reais      (padrão) os 32 pontos reais do seed/pontos-reais.csv
+// SEED_DADOS=ficticios  os 10 de mentirinha do seed/pontos-ficticios.json (os testes usam esses)
+// SEED_DADOS=ambos      tudo junto e misturado
 import { readFileSync } from 'node:fs';
 import bcrypt from 'bcryptjs';
 import { prisma } from '../src/config/db.js';

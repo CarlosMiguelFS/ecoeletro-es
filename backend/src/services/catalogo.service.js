@@ -16,7 +16,7 @@ export async function listarCategorias() {
   }));
 }
 
-/** Números para gráficos da apresentação. */
+// números pros gráficos da apresentação 📊
 export async function obterEstatisticas() {
   const [totalPontos, porTipo, municipios, categorias, totalSugestoes] = await Promise.all([
     prisma.pontoColeta.count({ where: { ativo: true } }),

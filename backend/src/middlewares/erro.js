@@ -6,7 +6,8 @@ function responder(res, status, codigo, mensagem, detalhes) {
   res.status(status).json({ erro: { codigo, mensagem, ...(detalhes && { detalhes }) } });
 }
 
-/** Todas as rotas respondem erros no mesmo formato: { erro: { codigo, mensagem, detalhes? } }. */
+// Todo erro da API sai no mesmo formato: { erro: { codigo, mensagem, detalhes? } }
+// O front só precisa aprender a ler um jeito.
 export function tratarErros(erro, req, res, next) {
   if (res.headersSent) return next(erro);
 
@@ -23,6 +24,7 @@ export function tratarErros(erro, req, res, next) {
   if (erro?.type === 'entity.parse.failed') {
     return responder(res, 400, 'JSON_INVALIDO', 'O corpo da requisição não é um JSON válido.');
   }
+  // códigos do Prisma: P2002 = duplicado, P2025 = não achou
   if (erro?.code === 'P2002') {
     return responder(res, 409, 'JA_EXISTE', 'Já existe um registro com esses dados.');
   }
@@ -30,6 +32,7 @@ export function tratarErros(erro, req, res, next) {
     return responder(res, 404, 'NAO_ENCONTRADO', 'Registro não encontrado.');
   }
 
+  // chegou aqui = a gente não previu. Loga tudo e torce
   console.error(erro);
   responder(res, 500, 'ERRO_INTERNO', 'Erro inesperado. Tente novamente.');
 }

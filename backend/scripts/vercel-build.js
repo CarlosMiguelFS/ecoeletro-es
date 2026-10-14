@@ -1,7 +1,8 @@
-// Build no Vercel (npm run vercel-build). Roda a cada deploy:
-//   1. copia o site (../frontend) para public/, que o Vercel serve pela CDN;
-//   2. troca o banco do schema para PostgreSQL (localmente continua SQLite);
-//   3. gera o Prisma Client, cria/atualiza as tabelas e carrega os pontos (upsert, não duplica).
+// Roda a cada deploy no Vercel (npm run vercel-build):
+//   1. copia o site (../frontend) pra public/, que é a única pasta que o Vercel serve
+//   2. troca SQLite por PostgreSQL no schema (só lá, aqui continua SQLite)
+//   3. gera o Prisma Client, cria as tabelas e carrega os pontos
+// Se der erro aqui, o deploy para e o site antigo continua no ar. Ufa.
 import { execSync } from 'node:child_process';
 import { cpSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 
@@ -29,7 +30,7 @@ const arquivoSchema = caminho('prisma/schema.prisma');
 const schema = readFileSync(arquivoSchema, 'utf8');
 writeFileSync(arquivoSchema, schema.replace('provider = "sqlite"', 'provider = "postgresql"'));
 
-// Criar tabelas pela conexão direta; o app usa a conexão com pool (DATABASE_URL).
+// tabelas pela conexão direta (o pooler do Neon não curte DDL); o app usa a com pool
 const envSemPool = { ...process.env, DATABASE_URL: process.env.DATABASE_URL_UNPOOLED || urlBanco };
 const rodar = (comando, env = process.env) => execSync(comando, { stdio: 'inherit', env });
 

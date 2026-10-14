@@ -1,7 +1,8 @@
-// Ponto de entrada no Vercel. Ele exige um arquivo chamado index.js, app.js ou server.js
-// (na raiz ou em src/) que IMPORTE o express e exporte o app como default. Por isso
-// este é o único arquivo com um desses nomes — os do src/ se chamam aplicacao.js e
-// servidor.js de propósito. Localmente e no Docker o servidor sobe por src/servidor.js.
+// Isso aqui só existe por causa do Vercel.
+// Ele sai procurando um index.js / app.js / server.js que importe o express,
+// e se achar mais de um escolhe o errado (já aconteceu, foi um dia longo).
+// Por isso os arquivos do src/ se chamam aplicacao.js e servidor.js.
+// Rodando local ou no Docker, quem sobe o servidor é o src/servidor.js.
 import express from 'express';
 import { criarApp } from './src/aplicacao.js';
 

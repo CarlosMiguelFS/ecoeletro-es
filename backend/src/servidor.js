@@ -9,6 +9,7 @@ const servidor = criarApp().listen(env.porta, () => {
   console.log(`  Docs:  http://localhost:${env.porta}/api/docs`);
 });
 
+// Ctrl+C fecha tudo direitinho, sem deixar conexão do banco pendurada
 async function encerrar() {
   servidor.close();
   await prisma.$disconnect();

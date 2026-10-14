@@ -2,9 +2,9 @@ import { env } from '../config/env.js';
 import { buscarJson } from '../utils/http.js';
 import { dentroDoES } from '../utils/geo.js';
 
-// Política do Nominatim: no máximo 1 requisição por segundo, com User-Agent identificando o app.
-// Todas as chamadas passam por esta fila, então nunca há duas ao mesmo tempo.
-const INTERVALO_MS = 1100;
+// O Nominatim é de graça, mas tem regra: 1 pedido por segundo e se identificar (User-Agent).
+// Quem passa disso toma ban. Então todo mundo entra nessa fila, um de cada vez, sem furar.
+const INTERVALO_MS = 1100; // 1 segundo + 100ms de educação
 let fila = Promise.resolve();
 let ultimaChamada = 0;
 
@@ -22,11 +22,10 @@ function naFila(tarefa) {
   return execucao;
 }
 
-/**
- * Endereço → { latitude, longitude } pelo Nominatim (OpenStreetMap).
- * Com logradouro, faz busca estruturada; só com bairro, busca livre "bairro, cidade" (a estruturada não tem bairro).
- * Retorna null se não achar, se o resultado cair fora do ES ou se o serviço falhar — nunca lança erro.
- */
+// Endereço → { latitude, longitude }.
+// Com rua usa a busca estruturada. Só com bairro vai na busca livre, porque a estruturada
+// simplesmente não tem campo de bairro (vai entender).
+// Não achou, caiu fora do ES ou o serviço caiu? Devolve null e vida que segue. Nunca explode.
 export async function geocodificar({ logradouro, numero, bairro, cidade }) {
   const parametros = new URLSearchParams({ format: 'jsonv2', limit: '1', countrycodes: 'br' });
   if (!logradouro && bairro) {

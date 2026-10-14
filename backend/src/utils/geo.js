@@ -1,11 +1,13 @@
+// o raio da Terra inteira, só pra saber quantos km faltam até o ecoponto
 const RAIO_TERRA_KM = 6371;
 
-// Retângulo que envolve o Espírito Santo (continente). Serve para descartar geocodificações erradas.
+// um retângulo em volta do ES. Se o geocodificador jurar que a rua fica em Minas, a gente não acredita
 const LIMITES_ES = { latMin: -21.35, latMax: -17.85, lngMin: -41.9, lngMax: -39.6 };
 
 const emRadianos = (graus) => (graus * Math.PI) / 180;
 
-/** Distância em km entre dois pontos (fórmula de Haversine). */
+// Haversine = distância em linha reta, "de avião".
+// Hoje só serve de pré-filtro e de plano B: a distância que aparece na tela é a de carro (OSRM).
 export function distanciaKm(lat1, lng1, lat2, lng2) {
   const dLat = emRadianos(lat2 - lat1);
   const dLng = emRadianos(lng2 - lng1);
@@ -26,21 +28,17 @@ export function dentroDoES(latitude, longitude) {
   );
 }
 
-/**
- * Link que abre a rota no Google Maps, sem API e sem custo.
- * Com origem, a rota parte do CEP buscado; sem origem, o Google usa a localização atual do aparelho
- * (que pode ser outra cidade: quem busca o CEP de Guriri estando em Vitória receberia a rota de Vitória).
- */
+// Link do Google Maps, de graça e sem API.
+// Sem origem, o Google sai da localização do celular. Foi assim que alguém buscou um CEP
+// de Guriri estando em Vitória e ganhou a rota Vitória → São Mateus. Agora a gente manda a origem.
 export function linkComoChegar(latitude, longitude, origem) {
   const parametros = new URLSearchParams({ api: '1', destination: `${latitude},${longitude}` });
   if (origem) parametros.set('origin', descreverOrigem(origem));
   return `https://www.google.com/maps/dir/?${parametros}`;
 }
 
-/**
- * Busca por CEP: manda o endereço por escrito ("Rua X, Bairro, Cidade - ES, 29945-430"), que o
- * Google Maps mostra como ponto de partida e localiza com precisão. Busca por GPS: coordenadas.
- */
+// Buscou por CEP? Vai o endereço por escrito ("Rua X, Bairro, Cidade - ES, 29945-430"),
+// que o Google mostra bonitinho como partida. Buscou pelo GPS? Vão as coordenadas mesmo.
 function descreverOrigem(origem) {
   if (!origem.cep) return `${origem.latitude},${origem.longitude}`;
   const local = [origem.logradouro, origem.bairro, origem.cidade && `${origem.cidade} - ES`];

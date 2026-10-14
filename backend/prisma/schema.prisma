@@ -1,8 +1,8 @@
-// Modelo de dados do EcoEletro ES (seção 4 do docs/levantamento-backend.md).
+// As tabelas do EcoEletro ES (detalhes na seção 4 do docs/levantamento-backend.md)
 //
-// Desenvolvimento: SQLite (arquivo local, zero instalação).
-// Produção no Vercel: scripts/vercel-build.js troca o provider para "postgresql" durante o build.
-// Campos "enum" são String porque o SQLite não tem enum; os valores válidos ficam em src/utils/constantes.js.
+// Local: SQLite, um arquivo e pronto, nada pra instalar.
+// Vercel: o scripts/vercel-build.js troca pra "postgresql" na hora do build.
+// Os "enums" são String porque o SQLite não tem enum. Os valores válidos ficam em src/utils/constantes.js
 
 generator client {
   provider = "prisma-client-js"

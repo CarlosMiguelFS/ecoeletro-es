@@ -31,7 +31,8 @@ const upload = multer({
   },
 });
 
-// Tudo abaixo exige login. Editores gerenciam pontos e sugestões; só admin exclui e importa.
+// daqui pra baixo é área VIP: só com login.
+// editor cuida de pontos e sugestões; excluir e importar CSV é coisa de admin
 rotasAdmin.use(exigirAuth);
 
 rotasAdmin.get('/pontos', validar({ query: esquemaListagem }), async (req, res) => {

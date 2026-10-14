@@ -3,7 +3,7 @@ import { AppError } from '../utils/erros.js';
 import { normalizarTexto } from '../utils/texto.js';
 import { geocodificar } from './geocodificacao.service.js';
 
-/** Busca ignorando acento e maiúsculas: "vitoria" encontra "Vitória". */
+// "vitoria", "VITÓRIA", " Vitória " → todos acham Vitória
 export async function encontrarMunicipioPorNome(nome) {
   if (!nome) return null;
   const alvo = normalizarTexto(nome);
@@ -11,7 +11,7 @@ export async function encontrarMunicipioPorNome(nome) {
   return municipios.find((m) => normalizarTexto(m.nome) === alvo) ?? null;
 }
 
-/** Usado no cadastro de pontos: se o município ainda não existe, descobre o centro dele pelo Nominatim. */
+// No cadastro de ponto: se a cidade ainda não está no banco, pergunta pro Nominatim onde ela fica e cadastra
 export async function obterOuCriarMunicipio(nome) {
   const existente = await encontrarMunicipioPorNome(nome);
   if (existente) return existente;
@@ -25,7 +25,7 @@ export async function obterOuCriarMunicipio(nome) {
   });
 }
 
-/** Municípios que têm pelo menos um ponto ativo. */
+// só as cidades que têm pelo menos um ponto ativo
 export async function listarMunicipiosComPontos() {
   const municipios = await prisma.municipio.findMany({
     orderBy: { nome: 'asc' },

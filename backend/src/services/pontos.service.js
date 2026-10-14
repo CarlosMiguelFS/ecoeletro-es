@@ -18,11 +18,8 @@ function lerHorario(texto) {
   }
 }
 
-/**
- * Converte o registro do banco no formato da API (snake_case, endereço pronto, link de rota).
- * Em buscas por proximidade, recebe a medida ({ reta, rota? }) e a origem (CEP ou GPS),
- * para mostrar a distância de carro e a rota partir de lá.
- */
+// Banco → formato da API (snake_case, endereço montadinho, link de rota).
+// Na busca por proximidade vem junto a medida ({ reta, rota? }) e a origem, pra rota sair do CEP.
 function formatarPonto(ponto, medida, origem) {
   const umaCasa = (km) => Math.round(km * 10) / 10;
   return {
@@ -30,7 +27,7 @@ function formatarPonto(ponto, medida, origem) {
     nome: ponto.nome,
     tipo: ponto.tipo,
     ...(medida && {
-      // De carro pelas ruas quando o roteamento respondeu; senão, linha reta.
+      // de carro se o OSRM respondeu, senão linha reta mesmo
       distancia_km: umaCasa(medida.rota ? medida.rota.distanciaKm : medida.reta),
       distancia_tipo: medida.rota ? 'carro' : 'linha_reta',
       ...(medida.rota && { duracao_min: medida.rota.duracaoMin }),
@@ -98,12 +95,10 @@ export async function obterPonto(id, { incluirInativos = false } = {}) {
   return formatarPonto(ponto);
 }
 
-/**
- * Pontos mais próximos de um CEP ou de uma coordenada (GPS do navegador), sempre no ES.
- * Devolve todos os pontos dentro do raio (padrão 12 km). Se nenhum cair no raio,
- * devolve só o mais próximo, esteja a que distância estiver, com fora_do_raio = true —
- * o usuário sempre recebe pelo menos um lugar para levar o material.
- */
+// O coração do projeto ❤️
+// Recebe um CEP (ou o GPS) e devolve os pontos dentro do alcance, de carro.
+// Regra de ouro: NINGUÉM sai de mãos vazias. Se não tiver nada no alcance, vai o mais
+// próximo, nem que seja a 100 km, com fora_do_raio = true.
 export async function buscarProximos({ cep, lat, lng, raio, limite, categoria, tipo }) {
   let origem;
   if (cep) {
@@ -115,8 +110,8 @@ export async function buscarProximos({ cep, lat, lng, raio, limite, categoria, t
     origem = { latitude: lat, longitude: lng, precisao: 'gps' };
   }
 
-  // Com algumas centenas de pontos, calcular a linha reta em memória é suficiente.
-  // Com milhares, troque por uma consulta PostGIS (ST_DWithin).
+  // com algumas centenas de pontos dá pra fazer tudo em memória tranquilo.
+  // Se um dia tiver milhares, aí é PostGIS (ST_DWithin). Problema do eu do futuro.
   const candidatos = await prisma.pontoColeta.findMany({
     where: await montarFiltro({ categoria, tipo }),
     include: incluir,
@@ -128,8 +123,8 @@ export async function buscarProximos({ cep, lat, lng, raio, limite, categoria, t
     }))
     .sort((a, b) => a.reta - b.reta);
 
-  // A rota pela rua nunca é mais curta que a linha reta: só quem está no alcance em linha reta
-  // pode estar no alcance de carro. Assim o OSRM só calcula esses (numa consulta só).
+  // Truque: pela rua nunca é mais perto que em linha reta (a não ser que você atravesse paredes).
+  // Então quem já está fora do alcance em linha reta nem vai pro OSRM.
   const noAlcanceReto = porLinhaReta.filter((item) => item.reta <= raio).slice(0, MAXIMO_DESTINOS);
   const rotas = await distanciasDeCarro(
     origem,
@@ -163,11 +158,8 @@ export async function buscarProximos({ cep, lat, lng, raio, limite, categoria, t
   };
 }
 
-/**
- * Nenhum ponto no alcance: devolve só o mais próximo, a qualquer distância.
- * Entre os 5 mais próximos em linha reta, escolhe o de menor trajeto de carro
- * (o mais perto "de avião" pode ficar do outro lado de uma baía).
- */
+// Nada no alcance: pega os 5 mais perto em linha reta e escolhe o mais perto DE CARRO.
+// O mais perto "de avião" pode estar do outro lado da baía de Vitória. Pergunta como a gente sabe.
 async function maisProximoDeCarro(origem, porLinhaReta, tentarCarro) {
   const finalistas = porLinhaReta.slice(0, 5);
   if (finalistas.length === 0) return [];
@@ -201,11 +193,9 @@ async function idsDasCategorias(slugs) {
 
 export const AVISO_LOCALIZACAO_APROXIMADA = 'Localização no mapa aproximada pelo bairro.';
 
-/**
- * Usa a coordenada informada ou geocodifica o endereço, do mais preciso ao menos preciso:
- * rua + número → só a rua → CEP → bairro (marcado como aproximado).
- * Nunca usa o centro do município para um ponto. Retorna { latitude, longitude, aproximada }.
- */
+// Veio latitude/longitude? Ótimo, usa. Senão a gente descobre pelo endereço:
+// rua + número → só a rua → CEP → bairro (esse marca como "aproximada").
+// Centro da cidade pra ponto de coleta NUNCA: imagina mandar o povo pra praça da matriz com uma geladeira.
 async function resolverCoordenadas(dados, municipio) {
   if (dados.latitude !== undefined) {
     if (!dentroDoES(dados.latitude, dados.longitude)) {
@@ -232,7 +222,7 @@ async function resolverCoordenadas(dados, municipio) {
         return { latitude: peloCep.latitude, longitude: peloCep.longitude, aproximada: false };
       }
     } catch {
-      // segue para o bairro
+      // deu ruim no CEP, bora pro bairro
     }
   }
 
@@ -288,7 +278,7 @@ export async function criarPonto(dados) {
   return formatarPonto(ponto);
 }
 
-/** PUT: substitui o ponto inteiro. Sem latitude/longitude no corpo, o endereço é geocodificado de novo. */
+// PUT troca o ponto inteiro. Se não mandar latitude/longitude, a gente geocodifica de novo
 export async function atualizarPonto(id, dados) {
   await obterPonto(id, { incluirInativos: true });
   const municipio = await obterOuCriarMunicipio(dados.municipio);
@@ -312,7 +302,7 @@ export async function atualizarPonto(id, dados) {
   return formatarPonto(ponto);
 }
 
-/** Não apaga: só marca como inativo, para manter o histórico e as sugestões ligadas ao ponto. */
+// não apaga de verdade, só esconde (ativo = false). As sugestões ligadas ao ponto agradecem
 export async function desativarPonto(id) {
   await obterPonto(id, { incluirInativos: true });
   await prisma.pontoColeta.update({ where: { id }, data: { ativo: false } });

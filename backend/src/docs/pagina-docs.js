@@ -1,5 +1,5 @@
-// Página do Swagger UI carregada por CDN. Não depende de express.static,
-// que não funciona no Vercel (lá os arquivos estáticos só saem da pasta public/).
+// Swagger via CDN. O jeito "normal" (swagger-ui-express) usa express.static,
+// e o Vercel ignora express.static. Então fomos de CDN e ficou até mais leve.
 const VERSAO_SWAGGER_UI = '5';
 const CDN = `https://cdn.jsdelivr.net/npm/swagger-ui-dist@${VERSAO_SWAGGER_UI}`;
 

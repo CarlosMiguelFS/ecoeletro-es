@@ -1,15 +1,19 @@
 import { env } from '../config/env.js';
 import { buscarJson } from '../utils/http.js';
 
-// Distância de carro pelas ruas, via OSRM (roteador gratuito sobre o OpenStreetMap, sem chave).
-// Uma única requisição (serviço "table") calcula da origem até todos os destinos.
+// Distância DE CARRO, pelas ruas.
+// Antes era linha reta e o site jurava que o EcoVix São Pedro ficava a 5,3 km do Jardim Carapina.
+// Pela rua são 11,3 km. Só se você fosse de helicóptero.
+//
+// Quem calcula é o OSRM (grátis, sem chave, em cima do OpenStreetMap), e numa consulta só
+// (serviço "table") ele devolve a distância da origem até todos os pontos.
 
-const VALIDADE_CACHE_MS = 60 * 60 * 1000;
+const VALIDADE_CACHE_MS = 60 * 60 * 1000; // 1h
 const MAXIMO_CACHE = 2000;
-// O servidor público do OSRM aceita no máximo 100 coordenadas por consulta (origem + 99 destinos).
+// limite do servidor público: 100 coordenadas por consulta (1 origem + 99 destinos)
 export const MAXIMO_DESTINOS = 99;
 
-// Mexer no seletor de alcance refaz a busca com a mesma origem: o cache evita consultar o OSRM de novo.
+// a pessoa arrasta o alcance pra lá e pra cá com a mesma origem. Sem cache, o OSRM ia nos odiar
 const cache = new Map();
 
 const chaveCache = (origem, destino) =>
@@ -26,11 +30,9 @@ function salvarCache(chave, valor) {
   cache.set(chave, { valor, em: Date.now() });
 }
 
-/**
- * Distância (km) e tempo (min) de carro da origem até cada destino, na mesma ordem dos destinos.
- * Um destino sem rota (ex.: ilha sem ponte) vem como null.
- * Retorna null inteiro se o roteamento estiver desligado ou o OSRM falhar: quem chama usa a linha reta.
- */
+// Devolve [{ distanciaKm, duracaoMin }, ...] na mesma ordem dos destinos.
+// Destino sem rota (ilha sem ponte, por exemplo) vem null.
+// Se o OSRM cair ou estiver desligado, devolve null inteiro e quem chamou se vira com a linha reta.
 export async function distanciasDeCarro(origem, destinos) {
   if (!env.roteamentoAtivo) return null;
   if (destinos.length > MAXIMO_DESTINOS)
@@ -42,7 +44,8 @@ export async function distanciasDeCarro(origem, destinos) {
     .filter(({ i }) => resultado[i] === undefined);
   if (faltando.length === 0) return resultado;
 
-  // Atenção: o OSRM usa longitude,latitude (ao contrário do Leaflet).
+  // CUIDADO: o OSRM quer longitude,latitude. O Leaflet quer latitude,longitude.
+  // Inverteu? Seu ponto de coleta vai parar no meio do oceano Índico.
   const coordenadas = [origem, ...faltando.map((f) => f.destino)]
     .map((p) => `${p.longitude},${p.latitude}`)
     .join(';');
@@ -71,7 +74,7 @@ export async function distanciasDeCarro(origem, destinos) {
   }
 }
 
-/** Só para os testes. */
+// só os testes usam isso
 export function limparCacheRotas() {
   cache.clear();
 }
