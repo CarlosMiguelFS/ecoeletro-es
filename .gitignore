@@ -1,0 +1,7 @@
+node_modules/
+.env
+*.db
+*.db-journal
+
+# Documentos do estágio (modelos, ofícios): ficam só na máquina
+documentos/

@@ -1,0 +1,114 @@
+// Modelo de dados do EcoEletro ES (seção 4 do docs/levantamento-backend.md).
+//
+// Desenvolvimento: SQLite (arquivo local, zero instalação).
+// Produção (Supabase/Neon): troque provider para "postgresql" e DATABASE_URL para a URL do banco.
+// Campos "enum" são String porque o SQLite não tem enum; os valores válidos ficam em src/utils/constantes.js.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Municipio {
+  id              Int           @id @default(autoincrement())
+  nome            String        @unique
+  latitudeCentro  Float         @map("latitude_centro")
+  longitudeCentro Float         @map("longitude_centro")
+  pontos          PontoColeta[]
+
+  @@map("municipios")
+}
+
+model Categoria {
+  id        Int              @id @default(autoincrement())
+  nome      String
+  slug      String           @unique
+  descricao String?
+  pontos    PontoCategoria[]
+
+  @@map("categorias")
+}
+
+model PontoColeta {
+  id           Int              @id @default(autoincrement())
+  nome         String
+  tipo         String // ecoponto | loja_parceira | cooperativa | orgao_publico
+  logradouro   String
+  numero       String           @default("S/N")
+  bairro       String
+  cep          String           @default("") // 8 dígitos, sem hífen; "" quando a fonte não informa
+  municipioId  Int              @map("municipio_id")
+  municipio    Municipio        @relation(fields: [municipioId], references: [id])
+  latitude     Float
+  longitude    Float
+  telefone     String?
+  email        String?
+  site         String?
+  horario      String? // JSON serializado, ex.: {"seg-sex":"08:00-17:00"}
+  observacoes  String?
+  fonteUrl     String?          @map("fonte_url") // de onde veio a informação (prefeitura, gestora, OSM...)
+  ativo        Boolean          @default(true)
+  verificadoEm DateTime?        @map("verificado_em")
+  createdAt    DateTime         @default(now()) @map("created_at")
+  updatedAt    DateTime         @updatedAt @map("updated_at")
+  categorias   PontoCategoria[]
+  sugestoes    Sugestao[]
+
+  @@unique([nome, cep, numero])
+  @@index([latitude, longitude])
+  @@index([ativo])
+  @@map("pontos_coleta")
+}
+
+model PontoCategoria {
+  pontoId     Int         @map("ponto_id")
+  categoriaId Int         @map("categoria_id")
+  ponto       PontoColeta @relation(fields: [pontoId], references: [id], onDelete: Cascade)
+  categoria   Categoria   @relation(fields: [categoriaId], references: [id], onDelete: Cascade)
+
+  @@id([pontoId, categoriaId])
+  @@map("ponto_categoria")
+}
+
+model Sugestao {
+  id           Int          @id @default(autoincrement())
+  pontoId      Int?         @map("ponto_id")
+  ponto        PontoColeta? @relation(fields: [pontoId], references: [id], onDelete: SetNull)
+  tipo         String // novo_ponto | correcao | ponto_fechado
+  mensagem     String
+  emailContato String?      @map("email_contato")
+  status       String       @default("pendente") // pendente | aprovada | rejeitada
+  createdAt    DateTime     @default(now()) @map("created_at")
+
+  @@index([status])
+  @@map("sugestoes")
+}
+
+model CepCache {
+  cep          String   @id
+  logradouro   String?
+  bairro       String?
+  cidade       String?
+  uf           String?
+  latitude     Float
+  longitude    Float
+  fonte        String // nominatim | nominatim_bairro | brasilapi | centro_municipio | nominatim_cidade
+  atualizadoEm DateTime @updatedAt @map("atualizado_em")
+
+  @@map("cep_cache")
+}
+
+model UsuarioAdmin {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  email     String   @unique
+  senhaHash String   @map("senha_hash")
+  papel     String   @default("editor") // admin | editor
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("usuarios_admin")
+}

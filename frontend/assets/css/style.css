@@ -1,0 +1,538 @@
+/* =========================================================
+   EcoEletro ES — estilos
+   Mobile first: os estilos base são para celular e as
+   media queries no final ajustam para telas maiores.
+   ========================================================= */
+
+/* ---------- Base ---------- */
+
+:root {
+  --primary-color: #2e7d32;
+  --primary-hover: #1b5e20;
+  --primary-light: #e8f5e9;
+  --secondary-color: #37474f;
+  --bg-light: #f4f6f8;
+  --text-color: #333333;
+  --text-muted: #666666;
+  --border-color: #e0e0e0;
+  --white: #ffffff;
+  --warning-color: #8a6100;
+  --error-color: #c62828;
+  --origin-color: #1565c0;
+  --radius: 8px;
+  --shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  color: var(--text-color);
+  line-height: 1.5;
+  background-color: var(--white);
+}
+
+.container {
+  width: 90%;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* ---------- Cabeçalho ---------- */
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background-color: var(--white);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.nav-container {
+  display: flex;
+  align-items: center;
+  padding: 0.8rem 0;
+}
+
+.logo {
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: var(--secondary-color);
+}
+
+.logo span {
+  color: var(--primary-color);
+}
+
+/* ---------- Hero e busca por CEP ---------- */
+
+.hero {
+  background:
+    linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)),
+    url("../img/plano-de-fundo.png") center/cover no-repeat;
+  color: var(--white);
+  padding: 3.5rem 0;
+  text-align: center;
+}
+
+.hero-content h1 {
+  font-size: 1.8rem;
+  margin-bottom: 0.8rem;
+}
+
+.hero-content p {
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.btn-primary {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto 1.5rem;
+  padding: 0.9rem 1.2rem;
+  border-radius: 6px;
+  background-color: var(--primary-color);
+  color: var(--white);
+  font-weight: bold;
+  text-align: center;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+}
+
+.btn-secundario {
+  padding: 0.75rem 1.2rem;
+  border: 2px solid var(--white);
+  border-radius: 6px;
+  background-color: var(--white);
+  color: var(--primary-color);
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.btn-secundario:hover {
+  background-color: transparent;
+  color: var(--white);
+}
+
+.filter-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+
+.filter-box label {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.filter-box input[type="text"] {
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  text-align: center;
+}
+
+/* ---------- Seções ---------- */
+
+.section {
+  padding: 2.5rem 0;
+}
+
+.bg-light {
+  background-color: var(--bg-light);
+}
+
+.section-title {
+  margin-bottom: 1.5rem;
+  color: var(--secondary-color);
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+/* ---------- Pontos de coleta: filtro e status ---------- */
+
+.barra-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 1rem;
+  margin-bottom: 0.8rem;
+}
+
+.barra-filtros label {
+  font-weight: 600;
+  color: var(--secondary-color);
+}
+
+.barra-filtros select {
+  flex: 1 1 200px;
+  max-width: 320px;
+  padding: 0.65rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: var(--white);
+  font-size: 1rem;
+}
+
+.status-busca {
+  min-height: 1.5em;
+  margin-bottom: 1rem;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.status-busca.aviso {
+  color: var(--warning-color);
+}
+
+.status-busca.erro {
+  color: var(--error-color);
+  font-weight: 600;
+}
+
+/* ---------- Pontos de coleta: mapa + lista lateral ----------
+   Celular: mapa em cima, lista embaixo.
+   Desktop (900px+): mapa à esquerda, lista à direita. */
+
+.painel-locais {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.mapa {
+  position: relative;
+  z-index: 0; /* mantém os controles do Leaflet abaixo do cabeçalho fixo */
+  width: 100%;
+  height: 380px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.lista-lateral {
+  display: flex;
+  flex-direction: column;
+  max-height: 360px;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background-color: var(--white);
+  box-shadow: var(--shadow);
+}
+
+.lista-titulo {
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid #eee;
+  color: var(--secondary-color);
+  font-size: 1rem;
+}
+
+.lista-pontos {
+  flex: 1;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.lista-pontos li + li {
+  border-top: 1px solid #f0f0f0;
+}
+
+.lista-vazia {
+  padding: 1.5rem 1rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.item-ponto {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-left: 4px solid transparent;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.item-ponto:hover,
+.item-ponto:focus-visible {
+  background-color: var(--bg-light);
+}
+
+.item-ponto.ativo {
+  border-left-color: var(--primary-color);
+  background-color: var(--primary-light);
+}
+
+.item-topo {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.item-nome {
+  color: var(--secondary-color);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.item-distancia {
+  flex-shrink: 0;
+  color: var(--primary-color);
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+
+.item-detalhe {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+/* ---------- Mapa: tiles, marcadores e raio ---------- */
+
+/* Com zoom de tela do Windows (125%, 150%) o navegador arredonda o tamanho dos tiles
+   e surgem linhas brancas entre eles. Um pixel a mais sobrepõe os tiles e cobre a fresta. */
+.leaflet-container img.leaflet-tile {
+  width: 257px !important;
+  height: 257px !important;
+}
+
+.leaflet-container .leaflet-tile-pane {
+  background-color: #aad3df; /* cor do mar no OSM: se sobrar fresta, ela some no mapa */
+}
+
+.marcador-ponto span {
+  display: block;
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--white);
+  border-radius: 50% 50% 50% 0;
+  background-color: var(--primary-color);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  transform: rotate(-45deg);
+}
+
+.marcador-origem {
+  border: 3px solid var(--white);
+  border-radius: 50%;
+  background-color: var(--origin-color);
+  box-shadow: 0 0 0 5px rgba(21, 101, 192, 0.3);
+}
+
+/* Círculo de 12 km em volta do CEP buscado */
+.raio-busca {
+  stroke: var(--primary-color);
+  stroke-width: 2;
+  stroke-dasharray: 6 6;
+  fill: var(--primary-color);
+  fill-opacity: 0.06;
+}
+
+/* ---------- Mapa: balão com os detalhes do ponto ---------- */
+
+.popup-ponto {
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.popup-ponto .badge {
+  display: inline-block;
+  margin-bottom: 0.35rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  background-color: var(--primary-light);
+  color: var(--primary-color);
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.popup-ponto h4 {
+  margin-bottom: 0.2rem;
+  color: var(--secondary-color);
+  font-size: 1rem;
+}
+
+/* O Leaflet define margens próprias para <p> dentro do balão. */
+.leaflet-popup-content .popup-ponto p {
+  margin: 0 0 0.4rem;
+}
+
+.leaflet-popup-content .popup-ponto p.popup-distancia {
+  color: var(--primary-color);
+  font-weight: bold;
+}
+
+.leaflet-popup-content .popup-ponto p.popup-obs {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-style: italic;
+}
+
+.leaflet-popup-content .popup-ponto p.popup-fonte {
+  font-size: 0.75rem;
+}
+
+.popup-horario {
+  margin-bottom: 0.4rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  list-style: none;
+}
+
+.popup-materiais {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+  list-style: none;
+}
+
+.popup-materiais li {
+  padding: 0.1rem 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  background-color: var(--bg-light);
+  font-size: 0.72rem;
+}
+
+.leaflet-popup-content a.popup-rota {
+  display: block;
+  margin-top: 0.3rem;
+  padding: 0.55rem;
+  border-radius: 6px;
+  background-color: var(--primary-color);
+  color: var(--white);
+  font-weight: bold;
+  text-align: center;
+  text-decoration: none;
+}
+
+.leaflet-popup-content a.popup-rota:hover {
+  background-color: var(--primary-hover);
+}
+
+/* ---------- "Por que descartar?" ---------- */
+
+.cards-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1.2rem;
+  border-radius: var(--radius);
+  background: var(--white);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.card h3 {
+  margin-bottom: 0.5rem;
+  color: var(--secondary-color);
+  font-size: 1.1rem;
+}
+
+.card p {
+  margin-bottom: 0.8rem;
+  font-size: 0.95rem;
+}
+
+.card .ref {
+  display: block;
+  margin-top: auto;
+  padding-top: 0.5rem;
+  border-top: 1px solid #eee;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+/* ---------- Rodapé ---------- */
+
+.footer {
+  padding: 1.5rem 0;
+  background-color: var(--secondary-color);
+  color: var(--white);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.footer-aviso {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  opacity: 0.75;
+}
+
+/* ---------- Tablet (768px+) ---------- */
+
+@media (min-width: 768px) {
+  .hero {
+    padding: 5rem 0;
+  }
+
+  .hero-content h1 {
+    font-size: 2.5rem;
+  }
+
+  .btn-primary {
+    display: inline-block;
+    width: auto;
+  }
+
+  .filter-box {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .filter-box input[type="text"] {
+    width: 250px;
+    text-align: left;
+  }
+
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+}
+
+/* ---------- Desktop (900px+): mapa e lista lado a lado ---------- */
+
+@media (min-width: 900px) {
+  .painel-locais {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    align-items: stretch;
+  }
+
+  .mapa {
+    height: 540px;
+  }
+
+  .lista-lateral {
+    max-height: 540px;
+  }
+}

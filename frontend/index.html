@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EcoEletro ES | Descarte de eletrônicos</title>
+    <meta
+      name="description"
+      content="Encontre pontos de coleta de lixo eletrônico perto de você no Espírito Santo."
+    />
+    <!-- O OpenStreetMap bloqueia (403) tiles pedidos sem Referer. -->
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="assets/css/style.css" />
+  </head>
+  <body>
+    <header class="header">
+      <div class="container nav-container">
+        <div class="logo">EcoEletro <span>ES</span></div>
+      </div>
+    </header>
+
+    <main>
+      <section id="inicio" class="hero">
+        <div class="container hero-content">
+          <h1>Descarte de Eletrônicos no ES</h1>
+          <p>Encontre pontos de coleta próximos a você e ajude a proteger o meio ambiente do nosso estado.</p>
+
+          <a href="#locais" id="btnLocalizacao" class="btn-primary"
+            >Encontre o Ponto de Coleta mais próximo</a
+          >
+
+          <form class="filter-box" id="formCep" novalidate>
+            <label for="cepInput">Digite seu CEP:</label>
+            <input
+              type="text"
+              id="cepInput"
+              placeholder="00000-000"
+              maxlength="9"
+              pattern="\d{5}-\d{3}"
+              inputmode="numeric"
+              autocomplete="postal-code"
+              aria-label="Digite seu CEP para buscar pontos de coleta"
+            />
+            <button type="submit" class="btn-secundario">Buscar</button>
+          </form>
+        </div>
+      </section>
+
+      <section id="locais" class="section bg-light">
+        <div class="container">
+          <h2 class="section-title">Pontos de Coleta</h2>
+
+          <div class="barra-filtros">
+            <label for="filtroCategoria">Material:</label>
+            <select id="filtroCategoria">
+              <option value="">Todos os materiais</option>
+            </select>
+          </div>
+          <p id="statusBusca" class="status-busca" role="status" aria-live="polite"></p>
+
+          <div id="containerMapaLista" class="painel-locais">
+            <div id="mapa" class="mapa" role="region" aria-label="Mapa dos pontos de coleta"></div>
+            <aside class="lista-lateral" aria-labelledby="tituloLista">
+              <h3 id="tituloLista" class="lista-titulo">Pontos de coleta</h3>
+              <ol id="listaPontos" class="lista-pontos"></ol>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section id="sobre" class="section">
+        <div class="container">
+          <h2 class="section-title">Por que descartar?</h2>
+          <div class="cards-grid">
+            <article class="card">
+              <h3>Descarte certo: o lixo eletrônico tem destino</h3>
+              <p>
+                Celulares, computadores, pilhas e cabos deixam de ser úteis, mas continuam valiosos. Quando
+                vão para o lixo comum, liberam metais pesados como chumbo e mercúrio, que contaminam solo e
+                água. Encaminhados corretamente, têm seus materiais recuperados e reinseridos na cadeia
+                produtiva.
+              </p>
+              <small class="ref"
+                >Referências: BRASIL. Lei nº 12.305/2010; BALDÉ, C. P. et al. The Global E-waste Monitor
+                2024.</small
+              >
+            </article>
+
+            <article class="card">
+              <h3>O tamanho do desafio</h3>
+              <p>
+                O mundo gerou cerca de 62 milhões de toneladas de resíduos eletrônicos em 2022, e apenas 22,3%
+                foram comprovadamente coletados e reciclados, segundo a ONU. O restante acaba em lixões ou
+                aterros, desperdiçando ouro, cobre e outros recursos valiosos.
+              </p>
+              <small class="ref"
+                >Referências: BALDÉ, C. P. et al. The Global E-waste Monitor 2024. ITU e UNITAR, 2024.</small
+              >
+            </article>
+
+            <article class="card">
+              <h3>Seus direitos e deveres</h3>
+              <p>
+                No Brasil, a Política Nacional de Resíduos Sólidos estabelece a responsabilidade compartilhada
+                entre fabricantes, comerciantes e consumidores. O Decreto nº 10.240/2020 regulamentou a
+                logística reversa de eletroeletrônicos. Ao consumidor cabe entregar os aparelhos nos pontos
+                autorizados.
+              </p>
+              <small class="ref">Referências: BRASIL. Lei nº 12.305/2010; Decreto nº 10.240/2020.</small>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        <p>&copy; 2026 - Projeto PEI II</p>
+        <p>Orientação de Descarte Eletroeletrônico ES</p>
+        <p class="footer-aviso">
+          Pontos de coleta reunidos de fontes públicas (prefeituras, Green Eletron, Reciclus e outras).
+          Horários e materiais aceitos podem mudar: confirme com o local antes de ir.
+        </p>
+      </div>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/app.js"></script>
+  </body>
+</html>
