@@ -89,7 +89,8 @@ body {
   margin-bottom: 1.5rem;
 }
 
-.btn-primary {
+/* Faixa verde de destaque acima da busca. É só texto: a busca acontece no botão "Buscar". */
+.hero-content .chamada-destaque {
   display: block;
   width: 100%;
   max-width: 320px;
@@ -98,14 +99,9 @@ body {
   border-radius: 6px;
   background-color: var(--primary-color);
   color: var(--white);
+  font-size: 1rem;
   font-weight: bold;
   text-align: center;
-  text-decoration: none;
-  transition: background-color 0.2s ease;
-}
-
-.btn-primary:hover {
-  background-color: var(--primary-hover);
 }
 
 .btn-secundario {
@@ -524,7 +520,7 @@ body {
     font-size: 2.5rem;
   }
 
-  .btn-primary {
+  .hero-content .chamada-destaque {
     display: inline-block;
     width: auto;
   }

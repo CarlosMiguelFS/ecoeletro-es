@@ -21,7 +21,6 @@
   const el = {
     formCep: document.getElementById('formCep'),
     cep: document.getElementById('cepInput'),
-    btnLocalizacao: document.getElementById('btnLocalizacao'),
     filtro: document.getElementById('filtroCategoria'),
     raio: document.getElementById('raioInput'),
     raioValor: document.getElementById('raioValor'),
@@ -191,8 +190,12 @@
           interactive: false,
         }).addTo(camadaOrigem);
       }
-      L.marker([origem.latitude, origem.longitude], { icon: iconeOrigem, title: 'Você', zIndexOffset: 1000 })
-        .bindPopup('Sua localização (aproximada)')
+      L.marker([origem.latitude, origem.longitude], {
+        icon: iconeOrigem,
+        title: 'CEP buscado',
+        zIndexOffset: 1000,
+      })
+        .bindPopup('CEP buscado')
         .addTo(camadaOrigem);
     }
 
@@ -249,9 +252,9 @@
     mostrarStatus('Buscando pontos de coleta…');
 
     try {
-      const origem =
-        busca.tipo === 'cep' ? `cep=${busca.cep}` : `lat=${busca.latitude}&lng=${busca.longitude}`;
-      const dados = await chamarApi(`/pontos/proximos?${origem}&raio=${el.raio.value}${parametrosFiltro()}`);
+      const dados = await chamarApi(
+        `/pontos/proximos?cep=${busca.cep}&raio=${el.raio.value}${parametrosFiltro()}`,
+      );
       const raio = dados.raio_km;
       const deCarro = dados.distancia_tipo === 'carro';
       const medida = deCarro ? 'de carro' : 'em linha reta';
@@ -314,24 +317,6 @@
     }
     executar({ tipo: 'cep', cep: digitos });
     irParaResultados();
-  });
-
-  el.btnLocalizacao.addEventListener('click', (evento) => {
-    evento.preventDefault();
-    irParaResultados();
-    if (!navigator.geolocation) {
-      mostrarStatus('Seu navegador não permite localização. Digite seu CEP.', 'aviso');
-      return;
-    }
-    mostrarStatus('Obtendo sua localização…');
-    navigator.geolocation.getCurrentPosition(
-      ({ coords }) => executar({ tipo: 'gps', latitude: coords.latitude, longitude: coords.longitude }),
-      () => {
-        mostrarStatus('Não foi possível obter sua localização. Digite seu CEP acima.', 'aviso');
-        el.cep.focus();
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
-    );
   });
 
   // Trocar o material refaz a última busca; antes da primeira busca, só guarda a escolha.

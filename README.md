@@ -6,7 +6,7 @@ Projeto Integrador (PEI II) — Análise e Desenvolvimento de Sistemas.
 
 ## Funcionalidades
 
-- **Busca por CEP** (ou pela localização do navegador) com **alcance ajustável de 2 a 50 km** (padrão 12, o navegador lembra a escolha): mostra todos os pontos dentro do alcance **de carro, pelas ruas** (com tempo estimado), não em linha reta. Se não houver nenhum, mostra **o mais próximo**, a qualquer distância, sempre dentro do ES.
+- **Busca por CEP** (clique em **Buscar**) com **alcance ajustável de 2 a 50 km** (padrão 12, o navegador lembra a escolha): mostra todos os pontos dentro do alcance **de carro, pelas ruas** (com tempo estimado), não em linha reta. Se não houver nenhum, mostra **o mais próximo**, a qualquer distância, sempre dentro do ES.
 - **"Como chegar"** abre a rota no Google Maps **partindo do CEP digitado**, não de onde o aparelho está.
 - **Mapa** (Leaflet + OpenStreetMap) com lista lateral; o balão de cada ponto tem horário, telefone, materiais aceitos, fonte da informação e o botão **Como chegar** (abre a rota no Google Maps).
 - **Filtro por material**: celulares, computadores, pilhas, lâmpadas, eletrodomésticos…
@@ -113,8 +113,6 @@ docker compose up -d --build
 ```
 
 O site fica em `http://IP-DO-SERVIDOR:8090`. Para atualizar, envie os arquivos novos e rode `docker compose up -d --build` de novo — os dados do volume são mantidos.
-
-> Sem HTTPS, o botão "minha localização" não funciona (os navegadores só liberam a localização em sites seguros). A busca por CEP funciona normalmente.
 
 ## Créditos
 
