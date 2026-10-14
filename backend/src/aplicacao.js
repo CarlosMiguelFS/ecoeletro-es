@@ -20,8 +20,8 @@ function origemPermitida(origem, callback) {
   callback(null, permitida);
 }
 
-export function criarApp() {
-  const app = express();
+/** Configura middlewares e rotas no app recebido (o index.js do Vercel cria o app com express()). */
+export function criarApp(app = express()) {
   app.set('trust proxy', 1);
 
   // Documentação antes do helmet, porque o Swagger UI não funciona com a CSP abaixo.
