@@ -6,7 +6,8 @@ Projeto Integrador (PEI II) — Análise e Desenvolvimento de Sistemas.
 
 ## Funcionalidades
 
-- **Busca por CEP** (ou pela localização do navegador): mostra todos os pontos até **12 km**. Se não houver nenhum, mostra **o mais próximo**, a qualquer distância, sempre dentro do ES.
+- **Busca por CEP** (ou pela localização do navegador) com **alcance ajustável de 2 a 50 km** (padrão 12, o navegador lembra a escolha): mostra todos os pontos dentro do alcance. Se não houver nenhum, mostra **o mais próximo**, a qualquer distância, sempre dentro do ES.
+- **"Como chegar"** abre a rota no Google Maps **partindo do CEP digitado**, não de onde o aparelho está.
 - **Mapa** (Leaflet + OpenStreetMap) com lista lateral; o balão de cada ponto tem horário, telefone, materiais aceitos, fonte da informação e o botão **Como chegar** (abre a rota no Google Maps).
 - **Filtro por material**: celulares, computadores, pilhas, lâmpadas, eletrodomésticos…
 - **32 pontos reais** reunidos de fontes públicas (prefeituras, Green Eletron, Reciclus, EDP, UVV), cada um com a URL da fonte e a data da informação.

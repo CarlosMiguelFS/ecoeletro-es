@@ -2,16 +2,14 @@
   const API_URL = (() => {
     const configurada = window.ECOELETRO_CONFIG?.apiUrl;
     if (configurada) return configurada.replace(/\/$/, '');
-    const servidoPelaApi = location.protocol.startsWith('http') && location.port === '3000';
-    if (servidoPelaApi || !['localhost', '127.0.0.1', ''].includes(location.hostname)) {
-      return `${location.origin}/api`;
-    }
-    return 'http://localhost:3000/api';
+    // A própria API serve o site (local, Docker, Vercel): mesmo endereço. Só quando o HTML é aberto
+    // com dois cliques (file://) ou pelo Live Server (porta 5500) a API fica em localhost:3000.
+    const foraDaApi = location.protocol === 'file:' || location.port === '5500';
+    return foraDaApi ? 'http://localhost:3000/api' : `${location.origin}/api`;
   })();
 
-  // Todos os pontos até 12 km; se não houver nenhum, a API devolve só o mais próximo.
-  const RAIO_BUSCA_KM = 12;
   const CENTRO_ES = [-19.6, -40.6];
+  const CHAVE_RAIO_SALVO = 'ecoeletro:raio';
 
   const ROTULO_TIPO = {
     ecoponto: 'Ecoponto',
@@ -25,6 +23,8 @@
     cep: document.getElementById('cepInput'),
     btnLocalizacao: document.getElementById('btnLocalizacao'),
     filtro: document.getElementById('filtroCategoria'),
+    raio: document.getElementById('raioInput'),
+    raioValor: document.getElementById('raioValor'),
     status: document.getElementById('statusBusca'),
     tituloLista: document.getElementById('tituloLista'),
     lista: document.getElementById('listaPontos'),
@@ -162,7 +162,7 @@
 
   // ---------- Desenho ----------
 
-  function desenhar(pontos, origem, { mostrarRaio = false } = {}) {
+  function desenhar(pontos, origem, raioKm) {
     camadaPontos.clearLayers();
     camadaOrigem.clearLayers();
     marcadores.clear();
@@ -176,9 +176,9 @@
     }
 
     if (origem) {
-      if (mostrarRaio) {
+      if (raioKm) {
         L.circle([origem.latitude, origem.longitude], {
-          radius: RAIO_BUSCA_KM * 1000,
+          radius: raioKm * 1000,
           className: 'raio-busca',
           interactive: false,
         }).addTo(camadaOrigem);
@@ -197,6 +197,39 @@
       : '<li class="lista-vazia">Nenhum ponto para este material.</li>';
   }
 
+  // ---------- Alcance da busca ----------
+  // Limites e valor inicial vêm dos atributos min/max/value do <input type="range"> no HTML.
+
+  function limitarRaio(valor) {
+    if (valor === null || valor === '') return null;
+    const numero = Math.round(Number(valor));
+    if (!Number.isFinite(numero)) return null;
+    return Math.min(Number(el.raio.max), Math.max(Number(el.raio.min), numero));
+  }
+
+  function definirRaio(valor) {
+    el.raio.value = limitarRaio(valor) ?? el.raio.defaultValue;
+    el.raioValor.textContent = `${el.raio.value} km`;
+    el.raio.setAttribute('aria-valuetext', `${el.raio.value} quilômetros`);
+  }
+
+  // O navegador pode bloquear o armazenamento (aba anônima etc.): aí só não lembra.
+  function lerRaioSalvo() {
+    try {
+      return localStorage.getItem(CHAVE_RAIO_SALVO);
+    } catch {
+      return null;
+    }
+  }
+
+  function salvarRaio() {
+    try {
+      localStorage.setItem(CHAVE_RAIO_SALVO, el.raio.value);
+    } catch {
+      // segue sem lembrar
+    }
+  }
+
   // ---------- Buscas ----------
 
   function parametrosFiltro() {
@@ -210,23 +243,24 @@
     try {
       const origem =
         busca.tipo === 'cep' ? `cep=${busca.cep}` : `lat=${busca.latitude}&lng=${busca.longitude}`;
-      const dados = await chamarApi(`/pontos/proximos?${origem}&raio=${RAIO_BUSCA_KM}${parametrosFiltro()}`);
-      desenhar(dados.pontos, dados.origem, { mostrarRaio: true });
+      const dados = await chamarApi(`/pontos/proximos?${origem}&raio=${el.raio.value}${parametrosFiltro()}`);
+      const raio = dados.raio_km;
+      desenhar(dados.pontos, dados.origem, raio);
 
       const avisos = [];
       if (dados.fora_do_raio && dados.pontos.length) {
         const maisProximo = dados.pontos[0];
         el.tituloLista.textContent = 'Ponto mais próximo';
         avisos.push(
-          `Nenhum ponto até ${RAIO_BUSCA_KM} km. O mais próximo fica a ${formatarDistancia(maisProximo.distancia_km)}, em ${maisProximo.municipio}.`,
+          `Nenhum ponto até ${raio} km. O mais próximo fica a ${formatarDistancia(maisProximo.distancia_km)}, em ${maisProximo.municipio}.`,
         );
       } else if (dados.fora_do_raio) {
         el.tituloLista.textContent = 'Nenhum ponto';
         avisos.push('Nenhum ponto de coleta cadastrado para este material.');
       } else {
-        el.tituloLista.textContent = `${dados.total} ${dados.total === 1 ? 'ponto' : 'pontos'} até ${RAIO_BUSCA_KM} km`;
+        el.tituloLista.textContent = `${dados.total} ${dados.total === 1 ? 'ponto' : 'pontos'} até ${raio} km`;
         avisos.push(
-          `${dados.total} ${dados.total === 1 ? 'ponto encontrado' : 'pontos encontrados'} a até ${RAIO_BUSCA_KM} km.`,
+          `${dados.total} ${dados.total === 1 ? 'ponto encontrado' : 'pontos encontrados'} a até ${raio} km.`,
         );
       }
       if (dados.origem.precisao === 'municipio') {
@@ -294,6 +328,14 @@
     if (ultimaBusca) executar(ultimaBusca);
   });
 
+  // Alcance: o número acompanha o arraste; ao soltar, lembra a escolha e,
+  // se já houve uma busca, refaz com o novo raio (o CEP continua só no botão Buscar).
+  el.raio.addEventListener('input', () => definirRaio(el.raio.value));
+  el.raio.addEventListener('change', () => {
+    salvarRaio();
+    if (ultimaBusca) executar(ultimaBusca);
+  });
+
   el.lista.addEventListener('click', (evento) => {
     const item = evento.target.closest('[data-id]');
     if (!item) return;
@@ -309,10 +351,14 @@
   function mostrarEstadoInicial() {
     el.tituloLista.textContent = 'Pontos de coleta';
     el.lista.innerHTML =
-      '<li class="lista-vazia">Digite seu CEP acima e clique em <strong>Buscar</strong> para ver os pontos até 12 km de você.</li>';
+      '<li class="lista-vazia">Digite seu CEP acima, escolha o alcance e clique em <strong>Buscar</strong> para ver os pontos perto de você.</li>';
   }
 
   async function iniciar() {
+    // Alcance: o da URL (?raio=20) tem prioridade; senão, o último escolhido; senão, o padrão do HTML.
+    const parametros = new URLSearchParams(location.search);
+    definirRaio(parametros.get('raio') ?? lerRaioSalvo() ?? el.raio.defaultValue);
+
     try {
       const categorias = await chamarApi('/categorias');
       for (const categoria of categorias) {
@@ -323,8 +369,8 @@
       // Sem categorias o filtro fica só com "Todos"; o erro aparece na busca abaixo.
     }
 
-    // Link direto para uma busca, ex.: index.html?cep=29101-010
-    const cepDaUrl = new URLSearchParams(location.search).get('cep')?.replace(/\D/g, '');
+    // Link direto para uma busca, ex.: index.html?cep=29101-010&raio=20
+    const cepDaUrl = parametros.get('cep')?.replace(/\D/g, '');
     if (cepDaUrl?.length === 8) {
       el.cep.value = `${cepDaUrl.slice(0, 5)}-${cepDaUrl.slice(5)}`;
       executar({ tipo: 'cep', cep: cepDaUrl });

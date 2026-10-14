@@ -42,6 +42,11 @@
               autocomplete="postal-code"
               aria-label="Digite seu CEP para buscar pontos de coleta"
             />
+            <div class="campo-alcance">
+              <label for="raioInput">Alcance da busca:</label>
+              <input type="range" id="raioInput" min="2" max="50" step="1" value="12" />
+              <output id="raioValor" for="raioInput">12 km</output>
+            </div>
             <button type="submit" class="btn-secundario">Buscar</button>
           </form>
         </div>
@@ -125,8 +130,8 @@
       </div>
     </footer>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="assets/js/config.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="assets/js/app.js"></script>
   </body>
 </html>

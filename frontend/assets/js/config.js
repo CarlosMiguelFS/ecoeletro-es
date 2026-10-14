@@ -6,3 +6,7 @@
 window.ECOELETRO_CONFIG = {
   apiUrl: null,
 };
+
+// Posiciona os tiles do mapa em pixels inteiros (sem transform 3D). Evita linhas brancas entre os
+// tiles em telas com zoom de 125%/150%. Precisa ser definido ANTES de carregar o Leaflet.
+window.L_DISABLE_3D = true;

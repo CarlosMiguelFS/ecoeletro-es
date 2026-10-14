@@ -148,6 +148,32 @@ body {
   text-align: center;
 }
 
+/* Alcance da busca (slider de km) */
+.campo-alcance {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0.2rem 0.75rem;
+  text-align: left;
+}
+
+.campo-alcance label {
+  grid-column: 1 / -1;
+}
+
+.campo-alcance input[type="range"] {
+  width: 100%;
+  height: 2rem; /* área de toque confortável no celular */
+  accent-color: #66bb6a; /* verde mais claro: contrasta com o fundo escuro do topo */
+  cursor: pointer;
+}
+
+.campo-alcance output {
+  min-width: 3.5rem;
+  font-weight: bold;
+  text-align: right;
+}
+
 /* ---------- Seções ---------- */
 
 .section {
@@ -310,13 +336,6 @@ body {
 }
 
 /* ---------- Mapa: tiles, marcadores e raio ---------- */
-
-/* Com zoom de tela do Windows (125%, 150%) o navegador arredonda o tamanho dos tiles
-   e surgem linhas brancas entre eles. Um pixel a mais sobrepõe os tiles e cobre a fresta. */
-.leaflet-container img.leaflet-tile {
-  width: 257px !important;
-  height: 257px !important;
-}
 
 .leaflet-container .leaflet-tile-pane {
   background-color: #aad3df; /* cor do mar no OSM: se sobrar fresta, ela some no mapa */
@@ -509,8 +528,12 @@ body {
   }
 
   .filter-box input[type="text"] {
-    width: 250px;
+    width: 220px;
     text-align: left;
+  }
+
+  .campo-alcance {
+    width: 220px;
   }
 
   .cards-grid {

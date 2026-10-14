@@ -76,6 +76,18 @@ describe('Rotas públicas', () => {
     );
   });
 
+  it('respeita o alcance escolhido no seletor e recusa acima de 100 km', async () => {
+    const curto = await request(app).get('/api/pontos/proximos?lat=-20.33&lng=-40.29&raio=3');
+    const longo = await request(app).get('/api/pontos/proximos?lat=-20.33&lng=-40.29&raio=50');
+    assert.equal(curto.body.raio_km, 3);
+    assert.equal(longo.body.raio_km, 50);
+    assert.ok(curto.body.pontos.every((p) => p.distancia_km <= 3));
+    assert.ok(longo.body.total > curto.body.total, 'raio maior deve trazer mais pontos');
+
+    const demais = await request(app).get('/api/pontos/proximos?lat=-20.33&lng=-40.29&raio=101');
+    assert.equal(demais.status, 400);
+  });
+
   it('usa raio padrão de 12 km e traz todos os pontos dentro dele', async () => {
     const r = await request(app).get('/api/pontos/proximos?lat=-20.33&lng=-40.29');
     assert.equal(r.status, 200);
