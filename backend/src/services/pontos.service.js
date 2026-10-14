@@ -17,8 +17,11 @@ function lerHorario(texto) {
   }
 }
 
-/** Converte o registro do banco no formato da API (snake_case, endereço pronto, link de rota). */
-function formatarPonto(ponto, distancia) {
+/**
+ * Converte o registro do banco no formato da API (snake_case, endereço pronto, link de rota).
+ * Em buscas por proximidade, recebe a distância e a origem (CEP ou GPS) para a rota partir de lá.
+ */
+function formatarPonto(ponto, distancia, origem) {
   return {
     id: ponto.id,
     nome: ponto.nome,
@@ -41,7 +44,7 @@ function formatarPonto(ponto, distancia) {
     categorias: ponto.categorias.map((pc) => pc.categoria.slug),
     ativo: ponto.ativo,
     verificado_em: ponto.verificadoEm,
-    como_chegar: linkComoChegar(ponto.latitude, ponto.longitude),
+    como_chegar: linkComoChegar(ponto.latitude, ponto.longitude, origem),
   };
 }
 
@@ -125,7 +128,7 @@ export async function buscarProximos({ cep, lat, lng, raio, limite, categoria, t
     raio_km: raio,
     fora_do_raio: foraDoRaio,
     total: selecionados.length,
-    pontos: selecionados.map((item) => formatarPonto(item.ponto, item.distancia)),
+    pontos: selecionados.map((item) => formatarPonto(item.ponto, item.distancia, origem)),
   };
 }
 

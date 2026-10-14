@@ -65,6 +65,17 @@ describe('Rotas públicas', () => {
     assert.ok(distancias.every((d) => d <= 5));
   });
 
+  it('"Como chegar" parte do local buscado, não da localização do aparelho', async () => {
+    const r = await request(app).get('/api/pontos/proximos?lat=-20.33&lng=-40.29');
+    assert.equal(r.status, 200);
+    const link = new URL(r.body.pontos[0].como_chegar);
+    assert.equal(link.searchParams.get('origin'), '-20.33,-40.29');
+    assert.equal(
+      link.searchParams.get('destination'),
+      `${r.body.pontos[0].latitude},${r.body.pontos[0].longitude}`,
+    );
+  });
+
   it('usa raio padrão de 12 km e traz todos os pontos dentro dele', async () => {
     const r = await request(app).get('/api/pontos/proximos?lat=-20.33&lng=-40.29');
     assert.equal(r.status, 200);

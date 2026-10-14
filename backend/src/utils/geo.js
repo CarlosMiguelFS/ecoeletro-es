@@ -26,7 +26,13 @@ export function dentroDoES(latitude, longitude) {
   );
 }
 
-/** Link que abre a rota no Google Maps do usuário, sem API e sem custo. */
-export function linkComoChegar(latitude, longitude) {
-  return `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
+/**
+ * Link que abre a rota no Google Maps, sem API e sem custo.
+ * Com origem, a rota parte do CEP buscado; sem origem, o Google usa a localização atual do aparelho
+ * (que pode ser outra cidade: quem busca o CEP de Guriri estando em Vitória receberia a rota de Vitória).
+ */
+export function linkComoChegar(latitude, longitude, origem) {
+  const parametros = new URLSearchParams({ api: '1', destination: `${latitude},${longitude}` });
+  if (origem) parametros.set('origin', `${origem.latitude},${origem.longitude}`);
+  return `https://www.google.com/maps/dir/?${parametros}`;
 }
