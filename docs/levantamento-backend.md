@@ -1,4 +1,4 @@
-# Levantamento do Back-end — EcoEletro ES
+# Levantamento do Back-end: EcoEletro ES
 
 Projeto PEI II: um site que ajuda a encontrar pontos de coleta de lixo eletrônico no Espírito Santo.
 Este documento lista o que o back-end precisa fazer, quais serviços de mapa gratuitos dá para usar, o modelo de dados, os endpoints da API e os erros que devem aparecer no caminho.
@@ -15,7 +15,7 @@ O front ([frontend/index.html](../frontend/index.html)) já tem três lugares qu
 | `#containerMapaLista` / `#listaPontos`          | Lista de pontos (cards `.ponto-card` com `.badge`) + marcadores no mapa |
 | Botão "Encontre o Ponto de Coleta mais próximo" | Pode usar a geolocalização do navegador (lat/lng) em vez do CEP         |
 
-### Funcionalidades — o essencial (MVP, para a apresentação)
+### Funcionalidades: o essencial (MVP, para a apresentação)
 
 1. **Listar pontos de coleta**, com filtro por município e por tipo de material aceito.
 2. **Buscar pontos próximos por CEP**: CEP → coordenadas → pontos ordenados por distância.
@@ -23,7 +23,7 @@ O front ([frontend/index.html](../frontend/index.html)) já tem três lugares qu
 4. **Detalhe de um ponto**: endereço, horário, telefone, materiais aceitos, link "Como chegar".
 5. **Listar categorias de materiais** (celulares, pilhas, computadores…).
 
-### Funcionalidades — segunda fase
+### Funcionalidades: segunda fase
 
 6. **Painel administrativo** com login, para cadastrar, editar e desativar pontos.
 7. **Sugestões dos visitantes**: sugerir um ponto novo, avisar que um ponto fechou, corrigir um endereço.
@@ -32,7 +32,7 @@ O front ([frontend/index.html](../frontend/index.html)) já tem três lugares qu
 
 ---
 
-## 2. Mapas — opções gratuitas
+## 2. Mapas: opções gratuitas
 
 Todas as opções abaixo são gratuitas e **não precisam de cartão de crédito nem de chave de API**, o que o Google Maps exige.
 
@@ -43,7 +43,7 @@ Todas as opções abaixo são gratuitas e **não precisam de cartão de crédito
 | **CEP → endereço**                     | **ViaCEP** (`viacep.com.br/ws/{cep}/json/`)                                                                                                              | Não    | Não devolve coordenadas. CEP inexistente responde **HTTP 200** com `{"erro": true}`, então é preciso tratar isso.                                                                                                                                                                                     |
 | **CEP → endereço** (principal)         | **BrasilAPI CEP v2** (`brasilapi.com.br/api/cep/v2/{cep}`)                                                                                               | Não    | ⚠️ **Testado na prática:** a coordenada que ela devolve é a do **centro da cidade**, não a do CEP (29101-010 → exatamente o centro de Vila Velha). Serve só como fallback.                                                                                                                            |
 | **Endereço → coordenadas** (principal) | **Nominatim** (geocodificador do OpenStreetMap)                                                                                                          | Não    | **Máximo de 1 requisição por segundo**, precisa de um `User-Agent` identificando o app e **não pode** ser usado para autocompletar. Chame sempre pelo back-end e guarde o resultado em cache. Às vezes não acha a rua por diferença de grafia ("Vellozo" × "Veloso"); nesse caso, busque pelo bairro. |
-| **Distância** entre usuário e ponto    | **OSRM** (`router.project-osrm.org`, serviço _table_) para a distância **de carro pelas ruas**; Haversine (linha reta) só como pré-filtro e como reserva | Não    | ⚠️ **Testado na prática:** a linha reta enganava — 5,3 km "de avião" eram 11,3 km pela rua (Google: 11,1 km). Uma consulta calcula todos os destinos; resultado em cache. Se o OSRM cair, a busca volta para a linha reta e avisa.                                                                    |
+| **Distância** entre usuário e ponto    | **OSRM** (`router.project-osrm.org`, serviço _table_) para a distância **de carro pelas ruas**; Haversine (linha reta) só como pré-filtro e como reserva | Não    | ⚠️ **Testado na prática:** a linha reta enganava: 5,3 km "de avião" eram 11,3 km pela rua (Google: 11,1 km). Uma consulta calcula todos os destinos; resultado em cache. Se o OSRM cair, a busca volta para a linha reta e avisa.                                                                    |
 | **"Como chegar"**                      | Link para o Google Maps ou o Waze com o destino                                                                                                          | Não    | `https://www.google.com/maps/dir/?api=1&destination=LAT,LNG` abre a rota no app do usuário, sem API e sem custo.                                                                                                                                                                                      |
 
 ### Fluxo recomendado da busca por CEP
@@ -179,7 +179,7 @@ Sugestão inicial: celulares e tablets · computadores e notebooks · pilhas e b
 | GET    | `/api/admin/sugestoes`       | Lista as pendentes                                     |
 | PATCH  | `/api/admin/sugestoes/:id`   | Aprova ou rejeita                                      |
 
-### Exemplo de resposta — `GET /api/pontos/proximos?cep=29101010&limite=2`
+### Exemplo de resposta: `GET /api/pontos/proximos?cep=29101010&limite=2`
 
 ```json
 {
@@ -270,7 +270,7 @@ backend/
 │   ├── servidor.js            # sobe o Express (local e Docker)
 │   ├── aplicacao.js           # middlewares (helmet, cors, json, rate-limit), rotas e site estático
 │   ├── config/                # env.js (lê o .env), db.js (Prisma)
-│   ├── routes/                # publicas, pontos, auth, admin — validam a entrada e chamam os services
+│   ├── routes/                # publicas, pontos, auth, admin; validam a entrada e chamam os services
 │   ├── services/              # regras: pontos, cep, geocodificacao, municipios, sugestoes, catalogo, auth, importacao
 │   ├── validacao/             # esquemas.js (Zod)
 │   ├── middlewares/           # auth.js, erro.js, validar.js
@@ -291,9 +291,9 @@ As camadas `controllers/` e `repositories/` ficaram de fora: com o Prisma, cada 
 
 | Fase  | Entrega                                                                | Situação                                                                                                    |
 | ----- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| **1** | Express + banco + seed + `GET /api/pontos` e `/api/categorias`         | ✅ Feito — o front lista os pontos fictícios nos cards e no mapa                                            |
-| **2** | `GET /api/cep/:cep` + `GET /api/pontos/proximos` com cache e fallbacks | ✅ Feito — testado com CEPs reais de Vitória e Vila Velha                                                   |
-| **3** | Login + API administrativa com geocodificação automática               | ✅ API feita — ⏳ falta a **tela** do painel admin (hoje use o Swagger em `/api/docs`)                      |
-| **4** | Sugestões, estatísticas, Swagger e deploy                              | ✅ Sugestões, estatísticas e Swagger feitos — ⏳ falta o **formulário** de sugestões no site e o **deploy** |
+| **1** | Express + banco + seed + `GET /api/pontos` e `/api/categorias`         | ✅ Feito: o front lista os pontos fictícios nos cards e no mapa                                            |
+| **2** | `GET /api/cep/:cep` + `GET /api/pontos/proximos` com cache e fallbacks | ✅ Feito: testado com CEPs reais de Vitória e Vila Velha                                                   |
+| **3** | Login + API administrativa com geocodificação automática               | ✅ API feita. ⏳ falta a **tela** do painel admin (hoje use o Swagger em `/api/docs`)                      |
+| **4** | Sugestões, estatísticas, Swagger e deploy                              | ✅ Sugestões, estatísticas e Swagger feitos. ⏳ falta o **formulário** de sugestões no site e o **deploy** |
 
 Dados fictícios para a fase 1: [backend/seed/pontos-ficticios.json](../backend/seed/pontos-ficticios.json).

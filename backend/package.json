@@ -1,7 +1,7 @@
 {
   "name": "ecoeletro-es-api",
   "version": "1.0.0",
-  "description": "API do EcoEletro ES — pontos de coleta de lixo eletrônico no Espírito Santo (Projeto PEI II)",
+  "description": "API do EcoEletro ES: pontos de coleta de lixo eletrônico no Espírito Santo (Projeto PEI II)",
   "type": "module",
   "main": "src/servidor.js",
   "scripts": {

@@ -2,7 +2,7 @@
 
 Site para encontrar **pontos de coleta de lixo eletrônico no Espírito Santo**: você digita o CEP e vê no mapa todos os pontos até 12 km, com endereço, horário, materiais aceitos e rota.
 
-Projeto Integrador (PEI II) — Análise e Desenvolvimento de Sistemas.
+Projeto Integrador (PEI II), Análise e Desenvolvimento de Sistemas.
 
 ## Funcionalidades
 
@@ -22,7 +22,7 @@ Projeto Integrador (PEI II) — Análise e Desenvolvimento de Sistemas.
 | Front-end      | HTML, CSS e JavaScript puros + [Leaflet](https://leafletjs.com)                                                                                     |
 | Back-end       | Node.js, Express 5, Zod                                                                                                                             |
 | Banco de dados | SQLite via Prisma (troca para PostgreSQL mudando uma linha)                                                                                         |
-| Mapas e CEP    | OpenStreetMap (tiles), Nominatim (geocodificação), OSRM (distância de carro), OSRM (distância de carro), BrasilAPI e ViaCEP (CEP) — todos gratuitos |
+| Mapas e CEP    | OpenStreetMap (tiles), Nominatim (geocodificação), OSRM (distância de carro), BrasilAPI e ViaCEP (CEP). Todos gratuitos |
 | Testes         | `node:test` + Supertest                                                                                                                             |
 | Deploy         | Docker / Docker Compose                                                                                                                             |
 
@@ -82,17 +82,17 @@ Login do admin criado pelo seed: `admin@ecoeletro.local` / `trocar123` (mude `AD
 | `npm run db:seed`   | Reimporta os pontos (não duplica; reaproveita coordenadas já descobertas)        |
 | `npm run db:studio` | Abre o Prisma Studio para ver e editar o banco no navegador                      |
 
-Para adicionar ou corrigir pontos, edite [backend/seed/pontos-reais.csv](backend/seed/pontos-reais.csv) e rode `npm run db:seed` — ou envie um CSV em `POST /api/admin/pontos/importar` pelo Swagger. Linhas sem latitude/longitude são geocodificadas automaticamente.
+Para adicionar ou corrigir pontos, edite [backend/seed/pontos-reais.csv](backend/seed/pontos-reais.csv) e rode `npm run db:seed`, ou envie um CSV em `POST /api/admin/pontos/importar` pelo Swagger. Linhas sem latitude/longitude são geocodificadas automaticamente.
 
 ## Deploy no Vercel
 
-O back-end vira uma função serverless e o site é servido pela CDN do Vercel. Como lá o disco não é permanente, o banco é **PostgreSQL** (Neon, plano grátis); localmente continua SQLite — o build troca sozinho.
+O back-end vira uma função serverless e o site é servido pela CDN do Vercel. Como lá o disco não é permanente, o banco é **PostgreSQL** (Neon, plano grátis); localmente continua SQLite, e o build troca sozinho.
 
 1. **Add New → Project** → importe o repositório → em **Root Directory** escolha **`backend`** (o Vercel detecta o Express).
 2. Antes de fazer o deploy, abra **Environment Variables** e adicione:
-   - `JWT_SECRET` — um texto aleatório longo
-   - `ADMIN_SENHA` — a senha do usuário admin (`admin@ecoeletro.local`)
-3. Clique em **Deploy**. O primeiro deploy vai **falhar de propósito** pedindo o banco — é normal.
+   - `JWT_SECRET`: um texto aleatório longo
+   - `ADMIN_SENHA`: a senha do usuário admin (`admin@ecoeletro.local`)
+3. Clique em **Deploy**. O primeiro deploy vai **falhar de propósito** pedindo o banco, e isso é normal.
 4. No projeto: **Storage → Create Database → Neon** (Free) → conecte ao projeto (marque Production e Preview). Isso cria a variável `DATABASE_URL`.
 5. **Deployments → ⋯ → Redeploy**. O build (`npm run vercel-build`) copia o site para `public/`, cria as tabelas e carrega os 32 pontos.
 
@@ -112,7 +112,7 @@ EOF
 docker compose up -d --build
 ```
 
-O site fica em `http://IP-DO-SERVIDOR:8090`. Para atualizar, envie os arquivos novos e rode `docker compose up -d --build` de novo — os dados do volume são mantidos.
+O site fica em `http://IP-DO-SERVIDOR:8090`. Para atualizar, envie os arquivos novos e rode `docker compose up -d --build` de novo. Os dados do volume são mantidos.
 
 ## Créditos
 

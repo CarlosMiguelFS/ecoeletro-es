@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "EcoEletro ES — API",
+    "title": "EcoEletro ES | API",
     "version": "1.0.0",
     "description": "Pontos de coleta de lixo eletrônico no Espírito Santo (Projeto PEI II). Os dados do seed são fictícios."
   },

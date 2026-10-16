@@ -16,7 +16,7 @@ before(async () => {
       email: process.env.ADMIN_EMAIL || 'admin@ecoeletro.local',
       senha: process.env.ADMIN_SENHA || 'trocar123',
     });
-  assert.equal(resposta.status, 200, 'login do admin do seed falhou — rodou npm run db:setup?');
+  assert.equal(resposta.status, 200, 'login do admin do seed falhou. Rodou o npm run db:setup?');
   token = resposta.body.token;
 });
 
